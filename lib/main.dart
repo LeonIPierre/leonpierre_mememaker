@@ -4,6 +4,6 @@ import 'package:leonpierre_mememaker/views/app.dart';
 
 void main()
 {
-  debugPrintGestureArenaDiagnostics = true;
+  //debugPrintGestureArenaDiagnostics = true;
   runApp(App());
 }

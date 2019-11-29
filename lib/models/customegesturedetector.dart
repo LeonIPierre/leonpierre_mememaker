@@ -14,9 +14,8 @@ class CustomPanGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    //if(event.)
-    //event.
     //if the event is a pointer and goes up or down, win
+    //
+    //
   }
-
 }

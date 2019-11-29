@@ -1,4 +1,4 @@
-import 'dart:collection';
+//import 'dart:collection';
 import 'package:faker/faker.dart';
 
 import 'package:leonpierre_mememaker/models/mememodel.dart';
@@ -7,7 +7,8 @@ import 'package:rxdart/rxdart.dart';
 class MemesViewModel {
   final BehaviorSubject<List<Meme>> memesSubject = BehaviorSubject<List<Meme>>();
   Stream<List<Meme>> get memes => memesSubject.stream;
-
+  
+  Future<int> getTotal() async { return await memes.length; }
 
   MemesViewModel() {
     var memes = [
@@ -24,7 +25,8 @@ class MemesViewModel {
       TextMeme("", Uri(), Faker().lorem.word()),
     ];
 
-    memesSubject.add(UnmodifiableListView<Meme>(memes));
+    //memesSubject.addStream(Stream.fromIterable(memes.iterator));
+    memesSubject.add(memes);
   }
 
   void dispose() {
