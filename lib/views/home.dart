@@ -1,4 +1,3 @@
-import 'package:faker/faker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -19,73 +18,49 @@ class HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: new Swiper(
-            itemBuilder: (BuildContext context, int index) {
-              //widget.model.memes.fo
 
-              return buildContainer(context, widget.model.memesSubject.first.);
-            },
-            itemCount: 2,
-            scale: .85,
-            viewportFraction: .75
-          );
       body: new StreamBuilder(
         stream: widget.model.memesSubject,
-        builder: (BuildContext context, AsyncSnapshot<List<Meme>> snapshot) {
+        //initialData: widget.model.memesSubject.value,
+        builder: (BuildContext context, AsyncSnapshot<List<Meme>> snapshot) {          
+          if(!snapshot.hasData)
+            return buildEmpty();
 
+          if(snapshot.hasError)
+            return buildEmpty();
           
-          return Swiper(
-            itemBuilder: (BuildContext context, int index) {
-              return buildContainer(context, snapshot.data.elementAt(index));
-            },
-            itemCount: snapshot.hasData ? snapshot.data.length : 0,
-            scale: .85,
-            viewportFraction: .75
-          );
+          switch(snapshot.connectionState)
+          {
+            case ConnectionState.done:
+            //case ConnectionState.active:
+              return Swiper(
+                  itemBuilder: (BuildContext context, int index) {
+                    Meme item = snapshot.data.elementAt(index);
+                    return buildContainer(context, item, buildSlide(item));
+                  },
+                  itemCount: snapshot.hasData ? snapshot.data.length : 0,
+                  //pagination: new SwiperPagination(),
+                  //control: new SwiperPlugin(),
+                  scale: .85,
+                  viewportFraction: .75
+                );
+            case ConnectionState.waiting:
+            case ConnectionState.none:
+            case ConnectionState.active:
+              return Center(child: CircularProgressIndicator());
+          }
+          return null;
         }
       )
-
-      // body: Swiper(
-      //   //pager should show top memes for the viewed month
-      //   pagination: new SwiperPagination(
-      //               margin: new EdgeInsets.all(0.0),
-      //               builder: new SwiperCustomPagination(builder:
-      //                   (BuildContext context, SwiperPluginConfig config) {
-      //                 return new ConstrainedBox(
-      //                   child: new Row(
-      //                     children: <Widget>[
-      //                       new Text(
-      //                         "Test123",
-      //                         //"${titles[config.activeIndex]} ${config.activeIndex + 1}/${config.itemCount}",
-      //                         style: TextStyle(fontSize: 20.0),
-      //                       ),
-      //                       new Expanded(
-      //                         child: new Align(
-      //                           alignment: Alignment.centerRight,
-      //                           child: new DotSwiperPaginationBuilder(
-      //                                   color: Colors.black12,
-      //                                   activeColor: Colors.black,
-      //                                   size: 10.0,
-      //                                   activeSize: 20.0)
-      //                               .build(context, config),
-      //                         ),
-      //                       )
-      //                     ],
-      //                   ),
-      //                   constraints: new BoxConstraints.expand(height: 50.0),
-      //                 );
-      //               })),
-      //   //create custom control where you can hold it and select the month you want to go to?
-      //   control: new SwiperControl(),
-      // )
     );
   }
 
-  Widget buildContainer(BuildContext context, Meme model)
+  Widget buildContainer(BuildContext context, Meme model, Widget child)
   {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      child: widget,
+      
+      child: child,
 
       onTap: () {
         //favorite the meme...?
@@ -105,26 +80,21 @@ class HomeViewState extends State<HomeView> {
       },
     );
   }
-
   Widget buildSlide(Meme model)
   {
-    //assert(model != null);
+    assert(model != null);
 
     switch(model.runtimeType)
     {
-      //case VideoMeme:
       case AudioMeme:
       case TextMeme:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-        return new Text((model as TextMeme).text);
-        break;
+        return Text((model as TextMeme).text);
       case ImageMeme:
-        return new Image.network("http://via.placeholder.com/400x800.png", fit: BoxFit.scaleDown);
-        break;
       case GifMeme:
-        return new Image.network("http://via.placeholder.com/400x800", fit: BoxFit.scaleDown);
-        break;
+      case VideoMeme:
+        return Image.network(model.uri.toString(), fit: BoxFit.scaleDown);
       default:
-        return new Text(model.runtimeType.toString());
+        throw Exception("Illegal type exception");
         break;
     }
   }
@@ -132,5 +102,17 @@ class HomeViewState extends State<HomeView> {
   Widget buildEmpty()
   {
     return Text("You ain't got shit");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.model.getAll();
+  }
+
+  @override
+  void dispose() {
+    widget.model.dispose();
+    super.dispose();
   }
 }

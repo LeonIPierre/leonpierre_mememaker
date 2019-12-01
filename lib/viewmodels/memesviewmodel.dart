@@ -1,35 +1,27 @@
-//import 'dart:collection';
-import 'package:faker/faker.dart';
-
 import 'package:leonpierre_mememaker/models/mememodel.dart';
+import 'package:leonpierre_mememaker/services/MockApiService.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MemesViewModel {
   final BehaviorSubject<List<Meme>> memesSubject = BehaviorSubject<List<Meme>>();
   Stream<List<Meme>> get memes => memesSubject.stream;
   
-  Future<int> getTotal() async { return await memes.length; }
+  final MockApiService service = MockApiService();
 
   MemesViewModel() {
-    var memes = [
-      VideoMeme("", Uri()),
-      GifMeme("", Uri()),
-      //AudioMeme("", Uri()),
+  }
 
-      //AudioMeme("", Uri()),
-      ImageMeme("", Uri(path: "http://via.placeholder.com/400x800?text=Meme1"), "This is a placeholder"),
-      ImageMeme("", Uri(path: "http://via.placeholder.com/400x800?text=Meme2"), "This is a placeholder 2"),
-      TextMeme("", Uri(), Faker().lorem.word()),
-      TextMeme("", Uri(), Faker().lorem.word()),
-      TextMeme("", Uri(), Faker().lorem.word()),
-      TextMeme("", Uri(), Faker().lorem.word()),
-    ];
+  Future<List<Meme>> getAll() async {
+    await Future.delayed(Duration(seconds: 2));
+    List<Meme> memes = await service.getMemesAsync();
+    memesSubject.sink.add(memes);
 
-    //memesSubject.addStream(Stream.fromIterable(memes.iterator));
-    memesSubject.add(memes);
+    return memes;
   }
 
   void dispose() {
     memesSubject.close();
   }
 }
+
+MemesViewModel memesInstance = MemesViewModel();
