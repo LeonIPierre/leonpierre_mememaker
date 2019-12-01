@@ -12,13 +12,10 @@ class MockApiService {
 
       //AudioMeme("", Uri()),
       ImageMeme("", Uri.parse("http://via.placeholder.com/400x800.png?text=Meme1"),
-      DateTime.now(), "This is a placeholder"),
+        DateTime.now(), "This is a placeholder"),
       ImageMeme("", Uri.parse("http://via.placeholder.com/400x800?text=Meme2"),
-      DateTime.now(), "This is a placeholder 2"),
+        DateTime.now(), "This is a placeholder 2"),
       TextMeme("", Uri(),DateTime.now(), Faker().lorem.word()),
-      //TextMeme("", Uri(), Faker().lorem.word()),
-      //TextMeme("", Uri(), Faker().lorem.word()),
-      //TextMeme("", Uri(), Faker().lorem.word()),
     ];
   }
 }

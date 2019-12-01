@@ -15,7 +15,7 @@ class MemesViewModel {
     await Future.delayed(Duration(seconds: 2));
     List<Meme> memes = await service.getMemesAsync();
     memesSubject.sink.add(memes);
-
+    
     return memes;
   }
 
@@ -23,5 +23,3 @@ class MemesViewModel {
     memesSubject.close();
   }
 }
-
-MemesViewModel memesInstance = MemesViewModel();
