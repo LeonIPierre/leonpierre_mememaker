@@ -21,7 +21,7 @@ class AppContainerAppState extends State<AppContainer> {
       appBar: AppBar(
         title: Text("Title"),
       ),
-      body: new StreamBuilder(
+      body: StreamBuilder(
           stream: widget.navigationViewModel.pages,
           initialData: widget.navigationViewModel.navigation.value,
           builder: (BuildContext context,
@@ -29,7 +29,10 @@ class AppContainerAppState extends State<AppContainer> {
             switch (snapshot.data.item) {
               case NavigationItem.HOME:
                 return ViewModelProvider<MemesViewModel>(
-                    viewModel: MemesViewModel(), view: MemesGroupedView(filterExpression: (meme) => meme.dateCreated.isBefore(DateTime.now())));
+                    viewModel: MemesViewModel(),
+                    view: MemesGroupedView(
+                        filterExpression: (meme) =>
+                            meme.dateCreated.isBefore(DateTime.now())));
               case NavigationItem.FAVORITES:
                 return ViewModelProvider<MemesViewModel>(
                     viewModel: MemesViewModel(), view: FavoriteView());
