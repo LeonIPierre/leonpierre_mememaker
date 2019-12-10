@@ -17,21 +17,19 @@ class MemesGroupedView extends StatelessWidget {
     MemesViewModel viewModel = ViewModelProvider.of<MemesViewModel>(context);
     viewModel.initialize(filterExpression: filterExpression);
 
-    return Scaffold(
-      body: new StreamBuilder(
-          stream: viewModel.memes,
-          builder: (BuildContext context, AsyncSnapshot<List<Meme>> snapshot) {
-            if (snapshot.hasError) return MemesGroupedErrorViewComponent();
+    return StreamBuilder(
+        stream: viewModel.memes,
+        builder: (BuildContext context, AsyncSnapshot<List<Meme>> snapshot) {
+          if (snapshot.hasError) return MemesGroupedErrorViewComponent();
 
-            if (snapshot.hasData)
-              return snapshot.data.length == 0
-                  ? MemesGroupedEmptyViewComponent()
-                  : MemesGroupedViewComponent(
-                      memes: viewModel.groupMemes(snapshot.data),
-                      viewModel: viewModel);
+          if (snapshot.hasData)
+            return snapshot.data.length == 0
+                ? MemesGroupedEmptyViewComponent()
+                : MemesGroupedViewComponent(
+                    memes: viewModel.groupMemes(snapshot.data),
+                    viewModel: viewModel);
 
-            return MemesGroupedViewLoadingComponent();
-          }),
-    );
+          return MemesGroupedViewLoadingComponent();
+        });
   }
 }
