@@ -1,33 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:leonpierre_mememaker/models/memeclustermodel.dart';
 
-import 'package:leonpierre_mememaker/models/mememodel.dart';
+
 import 'package:leonpierre_mememaker/viewcomponents/memesgroupedview/empty.dart';
 import 'package:leonpierre_mememaker/viewcomponents/memesgroupedview/error.dart';
 import 'package:leonpierre_mememaker/viewcomponents/memesgroupedview/ideal.dart';
 import 'package:leonpierre_mememaker/viewcomponents/memesgroupedview/loading.dart';
-import 'package:leonpierre_mememaker/viewmodels/memesviewmodel.dart';
+import 'package:leonpierre_mememaker/viewmodels/clusteredmemesviewmodel.dart';
 import 'package:leonpierre_mememaker/viewmodels/viewmodelprovider.dart';
+import 'package:queries/collections.dart';
 
 class MemesGroupedView extends StatelessWidget {
-  final Function(Meme) filterExpression;
-  MemesGroupedView({Key key, this.filterExpression}) : super(key: key);
+  MemesGroupedView({Key key}) : super(key: key) {
+    
+  }
 
   @override
   Widget build(BuildContext context) {
-    MemesViewModel viewModel = ViewModelProvider.of<MemesViewModel>(context);
-    viewModel.initialize(filterExpression: filterExpression);
+    ClusteredMemesViewModel viewModel =
+        ViewModelProvider.of<ClusteredMemesViewModel>(context);
+    viewModel.getClusters(DateTime.now(), DateTime.now());
 
     return StreamBuilder(
-        stream: viewModel.memes,
-        builder: (BuildContext context, AsyncSnapshot<List<Meme>> snapshot) {
+        stream: viewModel.clusters,
+        builder:
+            (BuildContext context, AsyncSnapshot<List<MemeCluster>> snapshot) {
           if (snapshot.hasError) return MemesGroupedErrorViewComponent();
 
           if (snapshot.hasData)
             return snapshot.data.length == 0
                 ? MemesGroupedEmptyViewComponent()
                 : MemesGroupedViewComponent(
-                    memes: viewModel.groupMemes(snapshot.data),
-                    viewModel: viewModel);
+                    clusters: Collection(snapshot.data));
 
           return MemesGroupedViewLoadingComponent();
         });

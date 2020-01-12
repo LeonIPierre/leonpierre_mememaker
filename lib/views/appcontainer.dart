@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:leonpierre_mememaker/models/navigationItemmodel.dart';
+import 'package:leonpierre_mememaker/viewmodels/clusteredmemesviewmodel.dart';
 import 'package:leonpierre_mememaker/viewmodels/memesviewmodel.dart';
 import 'package:leonpierre_mememaker/viewmodels/navigationviewmodel.dart';
 import 'package:leonpierre_mememaker/viewmodels/viewmodelprovider.dart';
@@ -28,11 +29,9 @@ class AppContainerAppState extends State<AppContainer> {
               AsyncSnapshot<NavigationItemModel> snapshot) {
             switch (snapshot.data.item) {
               case NavigationItem.HOME:
-                return ViewModelProvider<MemesViewModel>(
-                    viewModel: MemesViewModel(),
-                    view: MemesGroupedView(
-                        filterExpression: (meme) =>
-                            meme.dateCreated.isBefore(DateTime.now())));
+                return ViewModelProvider<ClusteredMemesViewModel>(
+                    viewModel: ClusteredMemesViewModel(),
+                    view: MemesGroupedView());
               case NavigationItem.FAVORITES:
                 return ViewModelProvider<MemesViewModel>(
                     viewModel: MemesViewModel(), view: FavoriteView());

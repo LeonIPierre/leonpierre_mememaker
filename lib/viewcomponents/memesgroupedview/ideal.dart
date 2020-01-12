@@ -1,28 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:leonpierre_mememaker/models/memeclustermodel.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
-import 'package:leonpierre_mememaker/viewmodels/memesviewmodel.dart';
+import 'package:queries/collections.dart';
 
-class MemesGroupedViewComponent extends StatelessWidget {
-  final MemesViewModel viewModel;
-  final Map<String, List<Meme>> memes;
-  MemesGroupedViewComponent({Key key, this.viewModel, this.memes}) : super(key: key);
-
+/// View that groups memes by cluster
+class MemesGroupedViewComponent extends StatelessWidget {  
   final double scale = .85;
   final double viewportFraction = .75;
 
+  //final MemesViewModel viewModel;
+  final IEnumerable<MemeCluster> clusters;
+  MemesGroupedViewComponent({Key key, this.clusters})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) => Swiper(
-      itemBuilder: (BuildContext context, int index) => _buildMemeGroupContainer(memes.entries.elementAt(index).value),
-      itemCount: memes.length,
+      itemBuilder: (BuildContext context, int index) => Column(
+            children: <Widget>[
+              Text(clusters.elementAt(index).description ?? ""),
+              Expanded(
+                  child: _buildMemeGroupContainer(clusters.elementAt(index).memes),
+                  flex: 2)
+            ],
+          ),
+      itemCount: clusters.count(),
       scale: scale,
       viewportFraction: viewportFraction);
 
-  Widget _buildMemeGroupContainer(List<Meme> memes) => Swiper(
+  Widget _buildMemeGroupContainer(IEnumerable<Meme> memes) => Swiper(
       itemBuilder: (BuildContext context, int index) =>
           _buildMemeContainer(memes.elementAt(index)),
-      itemCount: memes.length,
+      itemCount: memes.count(),
       scale: scale,
       scrollDirection: Axis.vertical,
       pagination: new SwiperPagination());
