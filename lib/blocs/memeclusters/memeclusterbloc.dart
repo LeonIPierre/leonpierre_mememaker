@@ -3,7 +3,9 @@ import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/services/memeclusterservice.dart';
 
 class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
-  final MemeClusterService service = MemeClusterService();
+  final MemeClusterService service;
+
+  MemeClusterBloc(this.service); 
 
   @override
   MemeClusterState get initialState => MemeClusterLoadingState();

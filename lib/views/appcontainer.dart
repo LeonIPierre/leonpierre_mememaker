@@ -5,6 +5,7 @@ import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/blocs/navigation.dart';
 import 'package:leonpierre_mememaker/models/navigationItem.dart';
+import 'package:leonpierre_mememaker/services/memeclusterservice.dart';
 import 'package:leonpierre_mememaker/views/memeclusters/views.dart';
 
 class AppContainer extends StatefulWidget {
@@ -29,7 +30,8 @@ class _AppContainerAppState extends State<AppContainer> {
             switch (snapshot.data.item) {
               case NavigationItem.HOME:
                 return BlocProvider(
-                  create: (context) => MemeClusterBloc()..add(MemeClusterEvent.NewestMemes),
+                  create: (context) => MemeClusterBloc(MemeClusterService())
+                    ..add(MemeClusterEvent.NewestMemes),
                   child: MemeClustersView(),
                 );
               case NavigationItem.SEARCH:
