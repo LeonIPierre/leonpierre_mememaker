@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leonpierre_mememaker/blocs/clusteredmemesbloc.dart';
-import 'package:leonpierre_mememaker/views/components/memeclusters/states.dart';
-import 'package:leonpierre_mememaker/views/components/memeclusters/views.dart';
+import 'package:leonpierre_mememaker/blocs/memeclusters/clusteredmemesbloc.dart';
+import 'package:leonpierre_mememaker/blocs/memeclusters/states.dart';
+import 'package:leonpierre_mememaker/views/memeclusters/views.dart';
 
 class MemeClustersView extends StatefulWidget {
   @override

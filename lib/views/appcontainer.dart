@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leonpierre_mememaker/blocs/clusteredmemesbloc.dart';
-import 'package:leonpierre_mememaker/blocs/navigationviewmodel.dart';
-import 'package:leonpierre_mememaker/models/navigationItemmodel.dart';
-import 'package:leonpierre_mememaker/views/components/memeclusters/events.dart';
-import 'package:leonpierre_mememaker/views/memeclusters.dart';
+import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
+import 'package:leonpierre_mememaker/blocs/memeclusters/clusteredmemesbloc.dart';
+import 'package:leonpierre_mememaker/blocs/navigation.dart';
+import 'package:leonpierre_mememaker/models/navigationItem.dart';
+import 'package:leonpierre_mememaker/views/memeclusters/views.dart';
 
 class AppContainer extends StatefulWidget {
-  final NavigationViewModel navigationViewModel;
+  final NavigationBloc navigation;
 
-  AppContainer(this.navigationViewModel);
+  AppContainer(this.navigation);
 
   createState() => _AppContainerAppState();
 }
@@ -22,8 +22,8 @@ class _AppContainerAppState extends State<AppContainer> {
         title: Text("Title"),
       ),
       body: StreamBuilder(
-          stream: widget.navigationViewModel.pages,
-          initialData: widget.navigationViewModel.navigation.value,
+          stream: widget.navigation.pages,
+          initialData: widget.navigation.navigation.value,
           builder: (BuildContext context,
               AsyncSnapshot<NavigationItemModel> snapshot) {
             switch (snapshot.data.item) {
@@ -51,10 +51,10 @@ class _AppContainerAppState extends State<AppContainer> {
                 title: Text('Favorites'),
               ),
             ],
-            currentIndex: widget.navigationViewModel.navigation.value.index,
+            currentIndex: widget.navigation.navigation.value.index,
             selectedItemColor: Theme.of(context).primaryColor,
             onTap: (index) {
-              widget.navigationViewModel.toPage(index);
+              widget.navigation.toPage(index);
               //notify ui of state change
               setState(() {});
             });

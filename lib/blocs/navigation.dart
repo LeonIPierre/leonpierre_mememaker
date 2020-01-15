@@ -1,7 +1,7 @@
-import 'package:leonpierre_mememaker/models/navigationItemmodel.dart';
+import 'package:leonpierre_mememaker/models/navigationItem.dart';
 import 'package:rxdart/rxdart.dart';
 
-class NavigationViewModel {
+class NavigationBloc {
   final BehaviorSubject<NavigationItemModel> navigation = BehaviorSubject<NavigationItemModel>
     .seeded(NavigationItemModel.home);
   
