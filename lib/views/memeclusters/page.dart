@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leonpierre_mememaker/blocs/memeclusters/clusteredmemesbloc.dart';
+import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/states.dart';
 import 'package:leonpierre_mememaker/views/memeclusters/views.dart';
 
@@ -12,7 +12,7 @@ class MemeClustersView extends StatefulWidget {
 class _MemeClusterViewState extends State<MemeClustersView> {
   @override
   Widget build(BuildContext context) =>
-      BlocBuilder<ClusteredMemesBloc, MemeClusterState>(
+      BlocBuilder<MemeClusterBloc, MemeClusterState>(
         builder: (BuildContext context, MemeClusterState state) {
           if (state is MemeClusterEmptyState)
             return MemesGroupedEmptyViewComponent();

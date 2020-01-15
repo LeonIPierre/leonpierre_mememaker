@@ -3,7 +3,7 @@ import 'package:queries/collections.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class ClusteredMemeService {
+class MemeClusterService {
   final String baseUrl = "https://9bf181cd.ngrok.io/api/memes/clustered";
 
   Future<IEnumerable<MemeCluster>> byDateRangeAsync(

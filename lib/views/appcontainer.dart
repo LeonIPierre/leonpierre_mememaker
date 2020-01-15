@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
-import 'package:leonpierre_mememaker/blocs/memeclusters/clusteredmemesbloc.dart';
+import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/blocs/navigation.dart';
 import 'package:leonpierre_mememaker/models/navigationItem.dart';
 import 'package:leonpierre_mememaker/views/memeclusters/views.dart';
@@ -29,7 +29,7 @@ class _AppContainerAppState extends State<AppContainer> {
             switch (snapshot.data.item) {
               case NavigationItem.HOME:
                 return BlocProvider(
-                  create: (context) => ClusteredMemesBloc()..add(MemeClusterEvent.NewestMemes),
+                  create: (context) => MemeClusterBloc()..add(MemeClusterEvent.NewestMemes),
                   child: MemeClustersView(),
                 );
               case NavigationItem.SEARCH:
