@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leonpierre_mememaker/blocs/clusteredmemesbloc.dart';
+import 'package:leonpierre_mememaker/blocs/navigationviewmodel.dart';
 import 'package:leonpierre_mememaker/models/navigationItemmodel.dart';
-import 'package:leonpierre_mememaker/viewmodels/clusteredmemesviewmodel.dart';
-import 'package:leonpierre_mememaker/viewmodels/memesviewmodel.dart';
-import 'package:leonpierre_mememaker/viewmodels/navigationviewmodel.dart';
-import 'package:leonpierre_mememaker/viewmodels/viewmodelprovider.dart';
-import 'package:leonpierre_mememaker/views/favorite.dart';
-import 'package:leonpierre_mememaker/views/memesgrouped.dart';
+import 'package:leonpierre_mememaker/views/components/memeclusters/events.dart';
+import 'package:leonpierre_mememaker/views/memeclusters.dart';
 
 class AppContainer extends StatefulWidget {
   final NavigationViewModel navigationViewModel;
 
   AppContainer(this.navigationViewModel);
 
-  createState() => AppContainerAppState();
+  createState() => _AppContainerAppState();
 }
 
-class AppContainerAppState extends State<AppContainer> {
+class _AppContainerAppState extends State<AppContainer> {
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
@@ -29,17 +28,16 @@ class AppContainerAppState extends State<AppContainer> {
               AsyncSnapshot<NavigationItemModel> snapshot) {
             switch (snapshot.data.item) {
               case NavigationItem.HOME:
-                return ViewModelProvider<ClusteredMemesViewModel>(
-                    viewModel: ClusteredMemesViewModel(),
-                    view: MemesGroupedView());
-              case NavigationItem.FAVORITES:
-                return ViewModelProvider<MemesViewModel>(
-                    viewModel: MemesViewModel(), view: FavoriteView());
+                return BlocProvider(
+                  create: (context) => ClusteredMemesBloc()..add(MemeClusterEvent.NewestMemes),
+                  child: MemeClustersView(),
+                );
               case NavigationItem.SEARCH:
               default:
                 return null;
             }
           }),
+      //https://pub.dev/packages/curved_navigation_bar
       bottomNavigationBar: StreamBuilder(builder:
           (BuildContext context, AsyncSnapshot<NavigationItem> snapshot) {
         return BottomNavigationBar(

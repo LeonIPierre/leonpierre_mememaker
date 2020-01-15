@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:leonpierre_mememaker/viewmodels/appmodel.dart';
-import 'package:leonpierre_mememaker/viewmodels/navigationviewmodel.dart';
+import 'package:leonpierre_mememaker/blocs/appmodel.dart';
+import 'package:leonpierre_mememaker/blocs/navigationviewmodel.dart';
 import 'package:leonpierre_mememaker/views/appcontainer.dart';
 
 class App extends StatelessWidget {

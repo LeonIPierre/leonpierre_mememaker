@@ -19,13 +19,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  #libraries
   http: ^0.12.0+4
-  rxdart:
-  rx_command: ^4.3.2+1
-  flutter_swiper : ^1.1.6
+  rxdart: ^0.23.1
   queries: ^0.1.12
-  #bloc: ^2.0.0
-  #flutter_bloc: ^2.0.0
+  equatable: ^1.0.0
+
+  #framwork
+  bloc: ^3.0.0
+  flutter_bloc: ^3.1.0
+  
+  #ui widgets
+  flutter_swiper : ^1.1.6
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
