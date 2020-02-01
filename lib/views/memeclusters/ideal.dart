@@ -8,13 +8,16 @@ import 'package:queries/collections.dart';
 /// View that groups memes by cluster
 class MemesGroupedViewComponent extends StatelessWidget {  
   final double scale = .85;
-  final double viewportFraction = .75;
+  final double viewportFraction = .8;
 
   //final MemesViewModel viewModel;
   final IEnumerable<MemeCluster> clusters;
   MemesGroupedViewComponent({Key key, this.clusters})
       : super(key: key);
 
+  //when scrolling through memes you have to wait until the animation stops when scrolling
+  //before you can start scrolling up
+  //I believe its because it doesn't gain focus until the animation stops
   @override
   Widget build(BuildContext context) => Swiper(
       itemBuilder: (BuildContext context, int index) => Column(
@@ -41,6 +44,7 @@ class MemesGroupedViewComponent extends StatelessWidget {
   Widget _buildMemeContainer(Meme meme) => GestureDetector(
         behavior: HitTestBehavior.opaque,
         child: _buildMeme(meme),
+        //double tap 
         onDoubleTap: () {},
       );
 

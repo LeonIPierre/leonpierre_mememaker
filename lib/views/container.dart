@@ -5,18 +5,19 @@ import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/blocs/navigation.dart';
 import 'package:leonpierre_mememaker/models/navigationItem.dart';
-import 'package:leonpierre_mememaker/services/memeclusterservice.dart';
+import 'package:leonpierre_mememaker/repositories/memeclusterrepository.dart';
+import 'package:leonpierre_mememaker/repositories/userlikesrepository.dart';
 import 'package:leonpierre_mememaker/views/memeclusters/views.dart';
 
-class AppContainer extends StatefulWidget {
+class ScreensContainer extends StatefulWidget {
   final NavigationBloc navigation;
 
-  AppContainer(this.navigation);
+  ScreensContainer(this.navigation);
 
-  createState() => _AppContainerAppState();
+  createState() => _ScreensContainerState();
 }
 
-class _AppContainerAppState extends State<AppContainer> {
+class _ScreensContainerState extends State<ScreensContainer> {
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
@@ -30,9 +31,9 @@ class _AppContainerAppState extends State<AppContainer> {
             switch (snapshot.data.item) {
               case NavigationItem.HOME:
                 return BlocProvider(
-                  create: (context) => MemeClusterBloc(MemeClusterService())
-                    ..add(MemeClusterEvent.NewestMemes),
-                  child: MemeClustersView(),
+                  create: (context) => MemeClusterBloc(MemeClusterRepository(), UserLikesRepository())
+                    ..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters)),
+                  child: MemeClustersWidget(),
                 );
               case NavigationItem.SEARCH:
               default:

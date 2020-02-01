@@ -17,22 +17,22 @@ class MockApiService {
                 "1",
                 Uri.parse("http://via.placeholder.com/400x800.png?text=${faker.lorem.word()}"),
                 now.subtract(Duration(days: 2)),
-                "This is a placeholder"),
+                text: "This is a placeholder"),
             ImageMeme(
                 "2",
                 Uri.parse("http://via.placeholder.com/400x800.png?text=${faker.lorem.word()}"),
                 now.subtract(Duration(days: 1)),
-                "This is a placeholder"),
+                text: "This is a placeholder"),
             ImageMeme(
                 "3",
                 Uri.parse("http://via.placeholder.com/400x800.png?text=${faker.lorem.word()}"),
                 now,
-                "This is a placeholder"),
+                text: "This is a placeholder"),
             ImageMeme(
                 "4",
                 Uri.parse("http://via.placeholder.com/400x800?text=${faker.lorem.word()}"),
                 now.add(Duration(days: 1)),
-                "This is a placeholder 2"),
+                text: "This is a placeholder 2"),
             TextMeme("3", Uri(), DateTime.now().add(Duration(days: 5)),
                 now.toString()),
           ]);

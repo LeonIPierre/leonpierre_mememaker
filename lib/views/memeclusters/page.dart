@@ -4,12 +4,12 @@ import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/states.dart';
 import 'package:leonpierre_mememaker/views/memeclusters/views.dart';
 
-class MemeClustersView extends StatefulWidget {
+class MemeClustersWidget extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _MemeClusterViewState();
+  State<StatefulWidget> createState() => _MemeClusterWidgetState();
 }
 
-class _MemeClusterViewState extends State<MemeClustersView> {
+class _MemeClusterWidgetState extends State<MemeClustersWidget> {
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<MemeClusterBloc, MemeClusterState>(
