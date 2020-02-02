@@ -77,7 +77,7 @@ class MemesGroupedViewComponent extends StatelessWidget {
       case VideoMeme:
         return Image.network(
           meme.uri.toString(),
-          fit: BoxFit.scaleDown,
+          fit: BoxFit.contain,
           loadingBuilder: (BuildContext context, Widget child,
               ImageChunkEvent loadingProgress) {
             if (loadingProgress == null) return child;

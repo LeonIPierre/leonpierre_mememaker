@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/blocs/navigation.dart';
 import 'package:leonpierre_mememaker/models/navigationItem.dart';
 import 'package:leonpierre_mememaker/repositories/memeclusterrepository.dart';
 import 'package:leonpierre_mememaker/repositories/userlikesrepository.dart';
-import 'package:leonpierre_mememaker/views/memeclusters/views.dart';
+import 'package:leonpierre_mememaker/views/screens/memeclusters.dart';
+
+import 'screens/favorite.dart';
 
 class ScreensContainer extends StatefulWidget {
   final NavigationBloc navigation;
@@ -31,10 +34,15 @@ class _ScreensContainerState extends State<ScreensContainer> {
             switch (snapshot.data.item) {
               case NavigationItem.HOME:
                 return BlocProvider(
-                  create: (context) => MemeClusterBloc(MemeClusterRepository(), UserLikesRepository())
-                    ..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters)),
-                  child: MemeClustersWidget(),
+                  create: (context) => MemeClusterBloc(
+                      MemeClusterRepository(), UserLikesRepository())..add(
+                        MemeClusterEvent(MemeClusterEventId.LoadMemeClusters)),
+                  child: MemeClustersPage(),
                 );
+              case NavigationItem.FAVORITES:
+                return BlocProvider(
+                    create: (context) => FavoritesBloc(),
+                    child: FavoritesPage());
               case NavigationItem.SEARCH:
               default:
                 return null;
