@@ -44,6 +44,16 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
       case MemeClusterEventId.NoMemeClustersFound:
         yield MemeClusterEmptyState();
         return;
+      case MemeClusterEventId.MemeClusterLikeAdded:
+        var cluster = (event as MemeClusterStateChangeEvent).cluster;        
+        _userLikesRepository.likeCluster(cluster, DateTime.now());
+        yield state;
+        return;
+      case MemeClusterEventId.MemeClusterLikeRemoved:
+        var cluster = (event as MemeClusterStateChangeEvent).cluster;        
+        _userLikesRepository.removeClusterLike(cluster, DateTime.now());
+        yield state;
+        return;
       case MemeClusterEventId.Error:
         yield MemeClusterErrorState("Failed to load state $state");
         return;
@@ -61,26 +71,29 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
 
       return clusterEntities.join(
           userClusterLikes,
-          (c) => c.id,
-          (l) => (l as UserLikeEntity).id,
+          (entity) => entity.id,
+          (like) => (like as UserLikeEntity).id,
           (entity, like) => {"entity": entity, "like": like as UserLikeEntity});
-    }).then((mappedClusters) {
+    }).then((mappedClusters) async {
       var clusters = List<MemeCluster>();
+      final waitList = <Future<void>>[];
 
       //TODO run 1 query for all memes then map them back to the clusters
       //https://stackoverflow.com/questions/56600754/whencomplete-method-not-working-as-expected-flutter-async
-      mappedClusters.toList().forEach((mappedCluster) async {
+      mappedClusters.toList().forEach((mappedCluster) {
         var entity = mappedCluster["entity"] as MemeClusterEntity;
         var like = mappedCluster["like"] as UserLikeEntity;
 
-        await _mapMemesToLikes(entity.memes).then((memes) => MemeCluster(entity.id,
+        waitList.add(_mapMemesToLikes(entity.memes).then((memes) => MemeCluster(entity.id,
               memes: memes,
               description: entity.description,
               isLiked: like.isLiked)
-        ).then((cluster) => clusters.add(cluster));
+        ).then((cluster) => clusters.add(cluster)));
       });
 
-      return Collection(clusters);
+      return await Future.wait(waitList).then((value) {
+        return Collection(clusters);
+      });      
     }).catchError((error) {
       add(MemeClusterEvent(MemeClusterEventId.Error));
     });

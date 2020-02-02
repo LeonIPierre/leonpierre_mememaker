@@ -19,8 +19,8 @@ enum MemeClusterEventId {
   NewMemeAddedToCluster,
   MemeClustersFilteredByDateRange,
   MemeClustersFilteredByPopularity,
-  MemeClusterLiked,
-  MemeClusterUnliked
+  MemeClusterLikeAdded,
+  MemeClusterLikeRemoved
 }
 
 enum MemeEvent {
@@ -36,6 +36,11 @@ class MemeClusterEvent {
   MemeClusterEvent(this.id);
 }
 
+class MemeClusterStateChangeEvent extends MemeClusterEvent {
+  final MemeCluster cluster;
+  MemeClusterStateChangeEvent(MemeClusterEventId id, this.cluster) : super(id);
+}
+
 class MemeClustersLoadedEvent extends MemeClusterEvent {
   IEnumerable<MemeCluster> clusters;
 
@@ -48,3 +53,4 @@ class MemeClusterDateFilterEvent extends MemeClusterEvent {
 
   MemeClusterDateFilterEvent() : super(MemeClusterEventId.MemeClustersFilteredByDateRange); 
 }
+

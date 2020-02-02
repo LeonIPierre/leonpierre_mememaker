@@ -24,7 +24,7 @@ class UserLikesRepository {
       return await database.transaction((transaction) async {
         String parameters = clusters.select((c) => "(?)").toList().join(',');
         return await transaction.rawQuery(
-            "WITH clusterIds(clusterId) AS (VALUES ($parameters) " +
+            "WITH clusterIds(clusterId) AS (VALUES $parameters) " +
                 "SELECT a.clusterId as id, CASE WHEN b.dateliked IS NULL THEN 'false' ELSE 'true' " +
                 "END As isLiked FROM clusterIds a " +
                 "LEFT JOIN cluster_likes b ON a.clusterId=b.clusterId",
@@ -34,29 +34,26 @@ class UserLikesRepository {
         Collection(results.map((m) => UserLikeEntity.fromMap(m)).toList()));
   }
 
-  Future<IEnumerable<UserLikeEntity>> getUserMemeLikesAsync(
-      IEnumerable<MemeEntity> memes) async {
-    final db = await _initDatabaseInstance();
-
-    List<Map<String, dynamic>> results =
-        await db.transaction((transaction) async {
-      String parameterValues = memes.select((c) => "(?)").toList().join(',');
-      return await transaction.rawQuery(
-          "WITH memeIds(memeId) AS (VALUES ($parameterValues)" +
-              " SELECT a.memeId as id, CASE WHEN b.dateliked IS NULL THEN 'false' ELSE 'true' END As isLiked FROM memeIds a" +
-              " LEFT JOIN meme_likes b ON a.memeId=b.memeId",
+  Future<IEnumerable<UserLikeEntity>> getUserMemeLikesAsync(IEnumerable<MemeEntity> memes) async {
+    return await _initDatabaseInstance().then((database) async {
+        return database.transaction((transaction) async {
+          String parameterValues = memes.select((c) => "(?)").toList().join(',');
+          return await transaction.rawQuery("WITH memeIds(memeId) AS (VALUES $parameterValues) " +
+              "SELECT a.memeId as id, CASE WHEN b.dateliked IS NULL THEN 'false' ELSE 'true' END As isLiked FROM memeIds a " +
+              "LEFT JOIN meme_likes b ON a.memeId=b.memeId",
           memes.select((m) => m.id).toList());
-    });
-    return Collection(results.map((m) => UserLikeEntity.fromMap(m)).toList());
+        });
+      }).then((results) =>
+        Collection(results.map((m) => UserLikeEntity.fromMap(m)).toList()));
   }
 
   Future<bool> likeCluster(MemeCluster cluster, DateTime timestamp) async =>
       await _initDatabaseInstance().then((database) async {
         int newLike = await database.insert(
-            'cluster_likes', {"clusterId": cluster.id, "dateLiked": timestamp});
+            'cluster_likes', {"clusterId": cluster.id, "dateLiked": timestamp.millisecondsSinceEpoch});
         int audit = await database.insert('cluster_likes_audit', {
-          "memeId": cluster.id,
-          "auditTimestamp": timestamp,
+          "clusterId": cluster.id,
+          "auditTimestamp": timestamp.millisecondsSinceEpoch,
           "actionId": auditLikeAdded
         });
         return newLike == 1 && audit == 1;
@@ -68,7 +65,7 @@ class UserLikesRepository {
             where: "clusterId = ?", whereArgs: [cluster.id]);
         int audit = await database.insert('cluster_likes_audit', {
           "clusterId": cluster.id,
-          "auditTimestamp": timestamp,
+          "auditTimestamp": timestamp.millisecondsSinceEpoch,
           "actionId": auditLikeRemoved
         });
 
@@ -82,7 +79,7 @@ class UserLikesRepository {
         .insert('meme_likes', {"memeId": meme.id, "dateLiked": timestamp});
     int audit = await db.insert('meme_likes_audit', {
       "memeId": meme.id,
-      "auditTimestamp": timestamp,
+      "auditTimestamp": timestamp.millisecondsSinceEpoch,
       "actionId": auditLikeAdded
     });
 
@@ -95,7 +92,7 @@ class UserLikesRepository {
             .delete('meme_likes', where: "memeId = ?", whereArgs: [meme.id]);
         int audit = await database.insert('meme_likes_audit', {
           "memeId": meme.id,
-          "auditTimestamp": timestamp,
+          "auditTimestamp": timestamp.millisecondsSinceEpoch,
           "actionId": auditLikeRemoved
         });
 

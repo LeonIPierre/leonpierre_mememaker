@@ -16,7 +16,7 @@ class MemeEntity extends Equatable{
   factory MemeEntity.fromJson(Map<String, dynamic> json) => new MemeEntity(
       json['id'],
       Uri.parse(json['url']),
-      json['memeType'],
+      json['type'],
       DateTime.parse(json['dateCreated']),
       DateTime.parse(json['datePosted']),
       json['author']);

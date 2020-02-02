@@ -1,33 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:leonpierre_mememaker/blocs/memeclusters/events.dart';
+import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
 import 'package:queries/collections.dart';
 
 /// View that groups memes by cluster
-class MemesGroupedViewComponent extends StatelessWidget {  
+class MemesGroupedViewComponent extends StatelessWidget {
   final double scale = .85;
   final double viewportFraction = .8;
 
   //final MemesViewModel viewModel;
   final IEnumerable<MemeCluster> clusters;
-  MemesGroupedViewComponent({Key key, this.clusters})
-      : super(key: key);
+  MemesGroupedViewComponent({Key key, this.clusters}) : super(key: key);
 
-  //when scrolling through memes you have to wait until the animation stops when scrolling
-  //before you can start scrolling up
-  //I believe its because it doesn't gain focus until the animation stops
+  /*TODO when scrolling through memes you have to wait until the animation stops when scrolling
+  before you can start scrolling up I believe its because it doesn't gain focus until the animation stops*/
   @override
   Widget build(BuildContext context) => Swiper(
-      itemBuilder: (BuildContext context, int index) => Column(
-            children: <Widget>[
-              Text(clusters.elementAt(index).description ?? ""),
-              Expanded(
-                  child: _buildMemeGroupContainer(clusters.elementAt(index).memes),
-                  flex: 2)
-            ],
-          ),
+      itemBuilder: (BuildContext context, int index) {
+        var cluster = clusters.elementAt(index);
+
+        return Column(
+          children: <Widget>[
+            Row(children: <Widget>[
+                Text(cluster.description ?? "PlaceHolder Text"),
+                IconButton(
+                    icon: Icon(
+                      cluster.isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: cluster.isLiked ? Colors.red : Colors.redAccent,
+                    ),
+                    onPressed: () {
+                      var event = cluster.isLiked
+                          ? MemeClusterEventId.MemeClusterLikeRemoved
+                          : MemeClusterEventId.MemeClusterLikeAdded;
+                      BlocProvider.of<MemeClusterBloc>(context)
+                          .add(MemeClusterStateChangeEvent(event, cluster));
+                    })
+              ]),
+            Expanded(child: _buildMemeGroupContainer(cluster.memes), flex: 2)
+          ],
+        );
+      },
       itemCount: clusters.count(),
       scale: scale,
       viewportFraction: viewportFraction);
@@ -44,7 +61,7 @@ class MemesGroupedViewComponent extends StatelessWidget {
   Widget _buildMemeContainer(Meme meme) => GestureDetector(
         behavior: HitTestBehavior.opaque,
         child: _buildMeme(meme),
-        //double tap 
+        //double tap
         onDoubleTap: () {},
       );
 

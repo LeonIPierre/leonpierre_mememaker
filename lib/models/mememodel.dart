@@ -20,7 +20,7 @@ abstract class Meme {
 
   static Meme mapFromEntity(MemeEntity entity) {
     switch (entity.type) {
-      case "IMAGEMEME":
+      case "ImageMeme":
         return ImageMeme.fromEntity(entity);
       default:
        throw new Exception();
@@ -29,7 +29,7 @@ abstract class Meme {
 
   static Meme mapFromCopy(String type, {String id, Uri uri, DateTime dateCreated, DateTime datePosted, bool isLiked, String author, List<String> tags}) {
     switch (type) {
-      case "IMAGEMEME":
+      case "ImageMeme":
         return ImageMeme(id, uri, dateCreated, datePosted: datePosted, isLiked: isLiked, author: author);
       default:
        throw new Exception();
