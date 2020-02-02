@@ -26,7 +26,7 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
     switch (event.id) {
       case MemeClusterEventId.LoadMemeClusters:
         yield* _mapMemeClustersToLikes(_clusterRepository.byNewestAsync());
-        return;
+        break;
       case MemeClusterEventId.MemeClustersLoaded:
         var clusters = (event as MemeClustersLoadedEvent).clusters;
 
@@ -35,28 +35,28 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
         yield clusters != null && clusters.any()
             ? MemeClusterIdealState(clusters)
             : MemeClusterEmptyState();
-        return;
+        break;
       case MemeClusterEventId.NewMemeAddedToCluster:
         //TODO when a new meme is added an your in the ideal state that cluster needs to be udpated
         if (state is MemeClusterIdealState) yield state;
 
-        return;
+        break;
       case MemeClusterEventId.NoMemeClustersFound:
         yield MemeClusterEmptyState();
-        return;
+        break;
       case MemeClusterEventId.MemeClusterLikeAdded:
         var cluster = (event as MemeClusterStateChangeEvent).cluster;        
         _userLikesRepository.likeCluster(cluster, DateTime.now());
         yield state;
-        return;
+        break;
       case MemeClusterEventId.MemeClusterLikeRemoved:
         var cluster = (event as MemeClusterStateChangeEvent).cluster;        
         _userLikesRepository.removeClusterLike(cluster, DateTime.now());
         yield state;
-        return;
+        break;
       case MemeClusterEventId.Error:
         yield MemeClusterErrorState("Failed to load state $state");
-        return;
+        break;
       default:
         yield state;
     }

@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:leonpierre_mememaker/repositories/entities/userlike.dart';
+import 'package:queries/collections.dart';
 
-enum FavoriteEventId {
+enum FavoritesEventId {
   //ideal
   FavoritesLoaded,
 
@@ -25,6 +27,16 @@ enum FavoriteEventId {
   ErrorRemovingMeme,
 }
 
-abstract class FavoritesEvent extends Equatable {
-  const FavoritesEvent();
+class FavoritesEvent extends Equatable {
+  final FavoritesEventId id;
+  const FavoritesEvent(this.id);
+
+  @override
+  List<Object> get props => [id];
+}
+
+class FavoritesLoadedEvent extends FavoritesEvent {
+  final IEnumerable<UserLikeEntity> favorites;
+
+  FavoritesLoadedEvent(this.favorites) : super(FavoritesEventId.FavoritesLoaded);  
 }

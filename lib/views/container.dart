@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
@@ -41,7 +42,7 @@ class _ScreensContainerState extends State<ScreensContainer> {
                 );
               case NavigationItem.FAVORITES:
                 return BlocProvider(
-                    create: (context) => FavoritesBloc(),
+                    create: (context) => FavoritesBloc()..add(FavoritesEvent(FavoritesEventId.LoadFavorites)),
                     child: FavoritesPage());
               case NavigationItem.SEARCH:
               default:

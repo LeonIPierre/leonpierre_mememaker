@@ -32,7 +32,7 @@ enum MemeEvent {
 }
 
 class MemeClusterEvent {
-  MemeClusterEventId id;
+  final MemeClusterEventId id;
   MemeClusterEvent(this.id);
 }
 
