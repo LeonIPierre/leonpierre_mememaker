@@ -76,22 +76,21 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
           (entity, like) => {"entity": entity, "like": like as UserLikeEntity});
     }).then((mappedClusters) async {
       var clusters = List<MemeCluster>();
-      final waitList = <Future<void>>[];
+      final clusterFutures = <Future<void>>[];
 
       //TODO run 1 query for all memes then map them back to the clusters
-      //https://stackoverflow.com/questions/56600754/whencomplete-method-not-working-as-expected-flutter-async
       mappedClusters.toList().forEach((mappedCluster) {
         var entity = mappedCluster["entity"] as MemeClusterEntity;
         var like = mappedCluster["like"] as UserLikeEntity;
 
-        waitList.add(_mapMemesToLikes(entity.memes).then((memes) => MemeCluster(entity.id,
+        clusterFutures.add(_mapMemesToLikes(entity.memes).then((memes) => MemeCluster(entity.id,
               memes: memes,
               description: entity.description,
               isLiked: like.isLiked)
         ).then((cluster) => clusters.add(cluster)));
       });
 
-      return await Future.wait(waitList).then((value) {
+      return await Future.wait(clusterFutures).then((value) {
         return Collection(clusters);
       });      
     }).catchError((error) {
