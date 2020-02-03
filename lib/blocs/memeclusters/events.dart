@@ -23,22 +23,9 @@ enum MemeClusterEventId {
   MemeClusterLikeRemoved
 }
 
-enum MemeEvent {
-    NoMemesFound,
-    NoFavorites,
-    LoadMeme,
-    MemeLoaded,
-    NoNewMemesFound,
-}
-
 class MemeClusterEvent {
   final MemeClusterEventId id;
   MemeClusterEvent(this.id);
-}
-
-class MemeClusterStateChangeEvent extends MemeClusterEvent {
-  final MemeCluster cluster;
-  MemeClusterStateChangeEvent(MemeClusterEventId id, this.cluster) : super(id);
 }
 
 class MemeClustersLoadedEvent extends MemeClusterEvent {
@@ -47,10 +34,14 @@ class MemeClustersLoadedEvent extends MemeClusterEvent {
   MemeClustersLoadedEvent(this.clusters) : super(MemeClusterEventId.MemeClustersLoaded);
 }
 
+class MemeClusterStateChangeEvent extends MemeClusterEvent {
+  final MemeCluster cluster;
+  MemeClusterStateChangeEvent(MemeClusterEventId id, this.cluster) : super(id);
+}
+
 class MemeClusterDateFilterEvent extends MemeClusterEvent {
   DateTime start;
   DateTime end;
 
   MemeClusterDateFilterEvent() : super(MemeClusterEventId.MemeClustersFilteredByDateRange); 
 }
-

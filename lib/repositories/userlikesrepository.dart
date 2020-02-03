@@ -114,6 +114,7 @@ class UserLikesRepository {
             "CREATE TABLE meme_likes_audit(memeId TEXT, auditTimestamp DATETIME, actionId TEXT)");
       }, version: 1);
 
+
     return await _database;
   }
 

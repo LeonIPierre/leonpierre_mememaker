@@ -11,8 +11,7 @@ abstract class UserLikeState extends Equatable {
   List<Object> get props => [];
 }
 
-class UserLikesEmptyState extends UserLikeState {
-}
+class UserLikesEmptyState extends UserLikeState {}
 
 class UserLikesMemeClusterLoadedState extends UserLikeState {
   final IEnumerable<UserLikeEntity> likes;
@@ -21,6 +20,15 @@ class UserLikesMemeClusterLoadedState extends UserLikeState {
 
   @override
   List<Object> get props => [likes];
+}
+
+class UserLikesMemeClusterAndMemesLoadedState extends UserLikeState {
+  final IEnumerable<MemeCluster> clusters;
+
+  UserLikesMemeClusterAndMemesLoadedState(this.clusters);
+
+  @override
+  List<Object> get props => [clusters];
 }
 
 class UserLikesErrorState extends UserLikeState {}

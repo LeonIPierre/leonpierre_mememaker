@@ -6,6 +6,7 @@ import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/blocs/navigation.dart';
+import 'package:leonpierre_mememaker/blocs/userlikes/userlikesbloc.dart';
 import 'package:leonpierre_mememaker/models/navigationItem.dart';
 import 'package:leonpierre_mememaker/repositories/memeclusterrepository.dart';
 import 'package:leonpierre_mememaker/repositories/userlikesrepository.dart';
@@ -27,28 +28,59 @@ class _ScreensContainerState extends State<ScreensContainer> {
       appBar: AppBar(
         title: Text("Title"),
       ),
-      body: StreamBuilder(
-          stream: widget.navigation.pages,
-          initialData: widget.navigation.navigation.value,
-          builder: (BuildContext context,
-              AsyncSnapshot<NavigationItemModel> snapshot) {
-            switch (snapshot.data.item) {
-              case NavigationItem.HOME:
-                return BlocProvider(
-                  create: (context) => MemeClusterBloc(
-                      MemeClusterRepository(), UserLikesRepository())..add(
-                        MemeClusterEvent(MemeClusterEventId.LoadMemeClusters)),
-                  child: MemeClustersPage(),
-                );
-              case NavigationItem.FAVORITES:
-                return BlocProvider(
-                    create: (context) => FavoritesBloc()..add(FavoritesEvent(FavoritesEventId.LoadFavorites)),
-                    child: FavoritesPage());
-              case NavigationItem.SEARCH:
-              default:
-                return null;
-            }
-          }),
+      body: BlocProvider(
+        create: (BuildContext context) => UserLikesBloc(UserLikesRepository()),
+        child: StreamBuilder(
+            stream: widget.navigation.pages,
+            initialData: widget.navigation.navigation.value,
+            builder: (BuildContext context,
+                AsyncSnapshot<NavigationItemModel> snapshot) {
+              switch (snapshot.data.item) {
+                case NavigationItem.HOME:
+                  return BlocProvider<MemeClusterBloc>(
+                      create: (BuildContext context) => MemeClusterBloc(
+                          MemeClusterRepository(),
+                          BlocProvider.of<UserLikesBloc>(context))..add(MemeClusterEvent(
+                            MemeClusterEventId.LoadMemeClusters)),
+                      child: MemeClustersPage());
+                case NavigationItem.FAVORITES:
+                  return BlocProvider(
+                      create: (context) => FavoritesBloc()
+                        ..add(FavoritesEvent(FavoritesEventId.LoadFavorites)),
+                      child: FavoritesPage());
+                case NavigationItem.SEARCH:
+                default:
+                  return null;
+              }
+            }),
+      ),
+
+      // body: StreamBuilder(
+      //     stream: widget.navigation.pages,
+      //     initialData: widget.navigation.navigation.value,
+      //     builder: (BuildContext context,
+      //         AsyncSnapshot<NavigationItemModel> snapshot) {
+      //       switch (snapshot.data.item) {
+      //         case NavigationItem.HOME:
+      //           return MultiBlocProvider(providers: [
+      //             BlocProvider<UserLikesBloc>(
+      //               create: (BuildContext context) => UserLikesBloc(UserLikesRepository()),
+      //             ),
+      //             BlocProvider<MemeClusterBloc>(
+      //               create: (BuildContext context) =>  MemeClusterBloc(MemeClusterRepository(),
+      //               BlocProvider.of<UserLikesBloc>(context))..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters)),
+      //             )
+      //           ], child: MemeClustersPage());
+      //         case NavigationItem.FAVORITES:
+      //           return BlocProvider(
+      //               create: (context) => FavoritesBloc()
+      //                 ..add(FavoritesEvent(FavoritesEventId.LoadFavorites)),
+      //               child: FavoritesPage());
+      //         case NavigationItem.SEARCH:
+      //         default:
+      //           return null;
+      //       }
+      //     }),
       //https://pub.dev/packages/curved_navigation_bar
       bottomNavigationBar: StreamBuilder(builder:
           (BuildContext context, AsyncSnapshot<NavigationItem> snapshot) {

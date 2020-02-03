@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:leonpierre_mememaker/blocs/memeclusters/events.dart';
-import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
+import 'package:leonpierre_mememaker/blocs/userlikes/events.dart';
+import 'package:leonpierre_mememaker/blocs/userlikes/userlikesbloc.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
 import 'package:queries/collections.dart';
@@ -13,7 +13,6 @@ class MemesGroupedViewComponent extends StatelessWidget {
   final double scale = .85;
   final double viewportFraction = .8;
 
-  //final MemesViewModel viewModel;
   final IEnumerable<MemeCluster> clusters;
   MemesGroupedViewComponent({Key key, this.clusters}) : super(key: key);
 
@@ -35,10 +34,10 @@ class MemesGroupedViewComponent extends StatelessWidget {
                     ),
                     onPressed: () {
                       var event = cluster.isLiked
-                          ? MemeClusterEventId.MemeClusterLikeRemoved
-                          : MemeClusterEventId.MemeClusterLikeAdded;
-                      BlocProvider.of<MemeClusterBloc>(context)
-                          .add(MemeClusterStateChangeEvent(event, cluster));
+                          ? UserLikesEventId.MemeClusterLikeRemoved
+                          : UserLikesEventId.MemeClusterLikeAdded;
+                      BlocProvider.of<UserLikesBloc>(context)
+                          .add(MemeClusterLikeStateChangedEvent(event, cluster));
                     })
               ]),
             Expanded(child: _buildMemeGroupContainer(cluster.memes), flex: 2)
