@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/blocs/navigation.dart';
-import 'package:leonpierre_mememaker/blocs/userlikes/userlikesbloc.dart';
 import 'package:leonpierre_mememaker/models/navigationItem.dart';
+import 'package:leonpierre_mememaker/repositories/favoritesrepository.dart';
 import 'package:leonpierre_mememaker/repositories/memeclusterrepository.dart';
-import 'package:leonpierre_mememaker/repositories/userlikesrepository.dart';
 import 'package:leonpierre_mememaker/views/screens/memeclusters.dart';
 
-import 'screens/favorite.dart';
+import 'screens/favorites.dart';
 
 class ScreensContainer extends StatefulWidget {
   final NavigationBloc navigation;
@@ -29,7 +27,7 @@ class _ScreensContainerState extends State<ScreensContainer> {
         title: Text("Title"),
       ),
       body: BlocProvider(
-        create: (BuildContext context) => UserLikesBloc(UserLikesRepository()),
+        create: (BuildContext context) => FavoritesBloc(FavoritesRepository()),
         child: StreamBuilder(
             stream: widget.navigation.pages,
             initialData: widget.navigation.navigation.value,
@@ -40,13 +38,12 @@ class _ScreensContainerState extends State<ScreensContainer> {
                   return BlocProvider<MemeClusterBloc>(
                       create: (BuildContext context) => MemeClusterBloc(
                           MemeClusterRepository(),
-                          BlocProvider.of<UserLikesBloc>(context))..add(MemeClusterEvent(
+                          BlocProvider.of<FavoritesBloc>(context))..add(MemeClusterEvent(
                             MemeClusterEventId.LoadMemeClusters)),
                       child: MemeClustersPage());
                 case NavigationItem.FAVORITES:
                   return BlocProvider(
-                      create: (context) => FavoritesBloc()
-                        ..add(FavoritesEvent(FavoritesEventId.LoadFavorites)),
+                      create: (context) => BlocProvider.of<FavoritesBloc>(context),
                       child: FavoritesPage());
                 case NavigationItem.SEARCH:
                 default:

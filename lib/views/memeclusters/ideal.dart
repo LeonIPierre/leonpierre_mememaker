@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:leonpierre_mememaker/blocs/userlikes/events.dart';
-import 'package:leonpierre_mememaker/blocs/userlikes/userlikesbloc.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
 import 'package:queries/collections.dart';
@@ -34,10 +34,10 @@ class MemeClustersWidget extends StatelessWidget {
                     ),
                     onPressed: () {
                       var event = cluster.isLiked
-                          ? UserLikesEventId.MemeClusterLikeRemoved
-                          : UserLikesEventId.MemeClusterLikeAdded;
-                      BlocProvider.of<UserLikesBloc>(context)
-                          .add(MemeClusterLikeStateChangedEvent(event, cluster));
+                          ? FavoritesEventId.MemeClusterRemoved
+                          : FavoritesEventId.MemeClusterAdded;
+                      BlocProvider.of<FavoritesBloc>(context)
+                          .add(MemeClusterFavoriteStateChangedEvent(event, cluster));
                     })
               ]),
             Expanded(child: _buildMemeGroupContainer(cluster.memes), flex: 2)

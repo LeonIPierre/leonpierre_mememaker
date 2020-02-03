@@ -1,21 +1,21 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/states.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
-import 'package:leonpierre_mememaker/blocs/userlikes/events.dart';
-import 'package:leonpierre_mememaker/blocs/userlikes/states.dart';
-import 'package:leonpierre_mememaker/blocs/userlikes/userlikesbloc.dart';
 import 'package:leonpierre_mememaker/repositories/memeclusterrepository.dart';
 
 class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
   final MemeClusterRepository _clusterRepository;
   StreamSubscription _clustersStream;
-  StreamSubscription _userLikesStream;
-  UserLikesBloc _userLikesBloc;
+  StreamSubscription _favoritesStream;
+  FavoritesBloc _favoritesBloc;
 
-  MemeClusterBloc(this._clusterRepository, this._userLikesBloc) {
-    _userLikesStream = _userLikesBloc.listen((state) {
-      if (state is UserLikesMemeClusterAndMemesLoadedState) {
+  MemeClusterBloc(this._clusterRepository, this._favoritesBloc) {
+    _favoritesStream = _favoritesBloc.listen((state) {
+      if (state is MemeClusterAndMemesFavoritesLoadedState) {
         add(MemeClustersLoadedEvent(state.clusters));
       }
     });
@@ -28,8 +28,8 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
   Stream<MemeClusterState> mapEventToState(MemeClusterEvent event) async* {
     switch (event.id) {
       case MemeClusterEventId.LoadMemeClusters:
-        _userLikesBloc.add(UserLikesMemeClusterLoad(
-            UserLikesEventId.LoadClusterAndMemeLikes,
+        _favoritesBloc.add(MemeClusterFavoritesLoad(
+            FavoritesEventId.LoadFavoritedClustersAndMemes,
             await _clusterRepository.byNewestAsync()));
         break;
       case MemeClusterEventId.MemeClustersLoaded:
@@ -60,7 +60,7 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
   @override
   Future<void> close() {
     _clustersStream?.cancel();
-    _userLikesStream?.cancel();
+    _favoritesStream?.cancel();
     return super.close();
   }
 }

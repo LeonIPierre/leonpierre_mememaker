@@ -8,7 +8,7 @@ import 'package:path/path.dart';
 import 'package:queries/collections.dart';
 import 'package:sqflite/sqflite.dart';
 
-class UserLikesRepository {
+class FavoritesRepository {
   final String auditLikeAdded = "LIKE_ADDED";
   final String auditLikeRemoved = "LIKE_REMOVED";
 
@@ -18,7 +18,7 @@ class UserLikesRepository {
     //when a user goes to premium save
   }
 
-  Future<IEnumerable<UserLikeEntity>> getUserClusterLikesAsync(
+  Future<IEnumerable<UserLikeEntity>> getClusterFavoritesAsync(
       IEnumerable<MemeClusterEntity> clusters) async {
     return await _initDatabaseInstance().then((database) async {
       return await database.transaction((transaction) async {
@@ -34,7 +34,7 @@ class UserLikesRepository {
         Collection(results.map((m) => UserLikeEntity.fromMap(m)).toList()));
   }
 
-  Future<IEnumerable<UserLikeEntity>> getUserMemeLikesAsync(IEnumerable<MemeEntity> memes) async {
+  Future<IEnumerable<UserLikeEntity>> getMemeFavoritesAsync(IEnumerable<MemeEntity> memes) async {
     return await _initDatabaseInstance().then((database) async {
         return database.transaction((transaction) async {
           String parameterValues = memes.select((c) => "(?)").toList().join(',');
@@ -47,7 +47,7 @@ class UserLikesRepository {
         Collection(results.map((m) => UserLikeEntity.fromMap(m)).toList()));
   }
 
-  Future<bool> likeCluster(MemeCluster cluster, DateTime timestamp) async =>
+  Future<bool> favoriteCluster(MemeCluster cluster, DateTime timestamp) async =>
       await _initDatabaseInstance().then((database) async {
         int newLike = await database.insert(
             'cluster_likes', {"clusterId": cluster.id, "dateLiked": timestamp.millisecondsSinceEpoch});
@@ -59,7 +59,7 @@ class UserLikesRepository {
         return newLike == 1 && audit == 1;
       });
 
-  Future<bool> removeClusterLike(MemeCluster cluster, DateTime timestamp) async =>
+  Future<bool> removeClusterFavorite(MemeCluster cluster, DateTime timestamp) async =>
       await _initDatabaseInstance().then((database) async {
         int deletedCluster = await database.delete('cluster_likes',
             where: "clusterId = ?", whereArgs: [cluster.id]);
@@ -72,7 +72,7 @@ class UserLikesRepository {
         return deletedCluster == 1 && audit == 1;
       });
 
-  Future<bool> likeMeme(Meme meme, DateTime timestamp) async {
+  Future<bool> favoriteMeme(Meme meme, DateTime timestamp) async {
     final db = await _initDatabaseInstance();
 
     int newLike = await db
@@ -86,7 +86,7 @@ class UserLikesRepository {
     return newLike == 1 && audit == 1;
   }
 
-  Future<bool> removeMemeLike(Meme meme, DateTime timestamp) async =>
+  Future<bool> removeMemeFavorite(Meme meme, DateTime timestamp) async =>
       await _initDatabaseInstance().then((database) async {
         int deletedLike = await database
             .delete('meme_likes', where: "memeId = ?", whereArgs: [meme.id]);
