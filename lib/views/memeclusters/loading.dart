@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class MemesGroupedViewLoadingComponent extends StatelessWidget {
+class MemeClustersLoadingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(child: CircularProgressIndicator());
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 
-class MemesGroupedErrorViewComponent extends StatelessWidget {
+class MemeClustersErrorWidget extends StatelessWidget {
   final String id;
 
-  MemesGroupedErrorViewComponent({this.id});
+  MemeClustersErrorWidget({this.id});
 
   //TODO based on the error id return a meme that "matches"
   @override

@@ -15,13 +15,13 @@ class _MemeClusterWidgetState extends State<MemeClustersPage> {
       BlocBuilder<MemeClusterBloc, MemeClusterState>(
         builder: (BuildContext context, MemeClusterState state) {
           if (state is MemeClusterEmptyState)
-            return MemesGroupedEmptyViewComponent();
+            return MemeClustersEmptyWidget();
           else if (state is MemeClusterErrorState)
-            return MemesGroupedErrorViewComponent(id: state.message);
+            return MemeClustersErrorWidget(id: state.message);
           else if (state is MemeClusterIdealState)
-            return MemesGroupedViewComponent(clusters: state.clusters);
+            return MemeClustersWidget(clusters: state.clusters);
           else if (state is MemeClusterLoadingState)
-            return MemesGroupedViewLoadingComponent();
+            return MemeClustersLoadingWidget();
 
           return null;
         },

@@ -9,12 +9,12 @@ import 'package:leonpierre_mememaker/models/mememodel.dart';
 import 'package:queries/collections.dart';
 
 /// View that groups memes by cluster
-class MemesGroupedViewComponent extends StatelessWidget {
+class MemeClustersWidget extends StatelessWidget {
   final double scale = .85;
   final double viewportFraction = .8;
 
   final IEnumerable<MemeCluster> clusters;
-  MemesGroupedViewComponent({Key key, this.clusters}) : super(key: key);
+  MemeClustersWidget({Key key, this.clusters}) : super(key: key);
 
   /*TODO when scrolling through memes you have to wait until the animation stops when scrolling
   before you can start scrolling up I believe its because it doesn't gain focus until the animation stops*/
