@@ -1,26 +1,22 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:leonpierre_mememaker/repositories/entities/meme.dart';
 import 'package:queries/collections.dart';
 
+import 'contentbase.dart';
+
 @immutable
-class MemeClusterEntity extends Equatable {
-  final String id;
-
+class MemeClusterEntity extends ContentBaseEntity {
   final String description;
-
   final IEnumerable<MemeEntity> memes;
 
-  const MemeClusterEntity({this.id, this.description, this.memes});
+  MemeClusterEntity(id, {this.description, this.memes}) : super(id);
 
   factory MemeClusterEntity.fromJson(Map<String, dynamic> json) {
     var memesJson = json['memes'] as List;
 
-    return MemeClusterEntity(
-        id: json['id'],
+    return MemeClusterEntity(json['id'],
         description: json['description'],
-        memes:
-            Collection(memesJson.map((i) => MemeEntity.fromJson(i)).toList()));
+        memes: Collection(memesJson.map((i) => MemeEntity.fromJson(i)).toList()));
   }
 
   Map<String, dynamic> toMap() {

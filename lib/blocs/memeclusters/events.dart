@@ -19,8 +19,8 @@ enum MemeClusterEventId {
   NewMemeAddedToCluster,
   MemeClustersFilteredByDateRange,
   MemeClustersFilteredByPopularity,
-  MemeClusterLikeAdded,
-  MemeClusterLikeRemoved
+  AddMemeClusterLike,
+  RemoveMemeClusterLike
 }
 
 class MemeClusterEvent {

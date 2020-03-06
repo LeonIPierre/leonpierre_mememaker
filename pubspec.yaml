@@ -44,6 +44,8 @@ dependencies:
   cupertino_icons: ^0.1.2
    
 dev_dependencies:
+  test: ^1.3.0
+  bloc_test: ^3.0.0
   flutter_test:
     sdk: flutter
   faker: ^1.1.1

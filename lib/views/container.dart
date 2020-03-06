@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leonpierre_mememaker/blocs/components/share/sharebloc.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
@@ -34,16 +36,23 @@ class _ScreensContainerState extends State<ScreensContainer> {
             builder: (BuildContext context,
                 AsyncSnapshot<NavigationItemModel> snapshot) {
               switch (snapshot.data.item) {
+
                 case NavigationItem.HOME:
-                  return BlocProvider<MemeClusterBloc>(
-                      create: (BuildContext context) => MemeClusterBloc(
-                          MemeClusterRepository(),
-                          BlocProvider.of<FavoritesBloc>(context))..add(MemeClusterEvent(
-                            MemeClusterEventId.LoadMemeClusters)),
-                      child: MemeClustersPage());
+                  return MultiBlocProvider(
+                    providers: [
+                      BlocProvider<MemeClusterBloc>(
+                        create: (BuildContext context) => MemeClusterBloc(
+                          MemeClusterRepository(), BlocProvider.of<FavoritesBloc>(context)
+                          )..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters))
+                      ),
+                      BlocProvider<ShareBloc>(create: (BuildContext context) => ShareBloc())
+                    ],
+
+                    child: MemeClustersPage()
+                  );
                 case NavigationItem.FAVORITES:
                   return BlocProvider(
-                      create: (context) => BlocProvider.of<FavoritesBloc>(context),
+                      create: (context) => BlocProvider.of<FavoritesBloc>(context)..add(FavoritesLoadEvent(FavoritesEventId.LoadFavoritedMemes)),
                       child: FavoritesPage());
                 case NavigationItem.SEARCH:
                 default:
@@ -52,33 +61,7 @@ class _ScreensContainerState extends State<ScreensContainer> {
             }),
       ),
 
-      // body: StreamBuilder(
-      //     stream: widget.navigation.pages,
-      //     initialData: widget.navigation.navigation.value,
-      //     builder: (BuildContext context,
-      //         AsyncSnapshot<NavigationItemModel> snapshot) {
-      //       switch (snapshot.data.item) {
-      //         case NavigationItem.HOME:
-      //           return MultiBlocProvider(providers: [
-      //             BlocProvider<UserLikesBloc>(
-      //               create: (BuildContext context) => UserLikesBloc(UserLikesRepository()),
-      //             ),
-      //             BlocProvider<MemeClusterBloc>(
-      //               create: (BuildContext context) =>  MemeClusterBloc(MemeClusterRepository(),
-      //               BlocProvider.of<UserLikesBloc>(context))..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters)),
-      //             )
-      //           ], child: MemeClustersPage());
-      //         case NavigationItem.FAVORITES:
-      //           return BlocProvider(
-      //               create: (context) => FavoritesBloc()
-      //                 ..add(FavoritesEvent(FavoritesEventId.LoadFavorites)),
-      //               child: FavoritesPage());
-      //         case NavigationItem.SEARCH:
-      //         default:
-      //           return null;
-      //       }
-      //     }),
-      //https://pub.dev/packages/curved_navigation_bar
+      //TODO implement this animation https://pub.dev/packages/curved_navigation_bar
       bottomNavigationBar: StreamBuilder(builder:
           (BuildContext context, AsyncSnapshot<NavigationItem> snapshot) {
         return BottomNavigationBar(

@@ -14,7 +14,10 @@ class MemeClusterEmptyState extends MemeClusterState {}
 class MemeClusterIdealState extends MemeClusterState {
   final IEnumerable<MemeCluster> clusters;
 
-  const MemeClusterIdealState(this.clusters);
+  const MemeClusterIdealState({this.clusters});
+
+  @override
+  List<Object> get props => [clusters];
 }
 
 class MemeClusterErrorState extends MemeClusterState {

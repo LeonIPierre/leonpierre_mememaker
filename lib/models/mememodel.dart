@@ -1,13 +1,9 @@
+import 'package:leonpierre_mememaker/models/contentbase.dart';
 import 'package:leonpierre_mememaker/repositories/entities/meme.dart';
 
-abstract class Meme {
+abstract class Meme extends ContentBase {
   final DateTime dateCreated;
   final  DateTime datePosted;
-  final String id;
-  final Uri uri;
-
-  final String author;
-  final bool isLiked;
 
   //aggregate the states across different platforms
   List<int> likes;
@@ -15,8 +11,9 @@ abstract class Meme {
   //ml tags so that are found from the meme
   List<String> tags;
 
-  Meme(this.id, this.uri, this.dateCreated,
-      {this.datePosted, this.isLiked, this.author, this.tags});
+  Meme(id, Uri locationPath, this.dateCreated,
+      {this.datePosted, isLiked, author, this.tags}) :
+      super(id, path: locationPath, isLiked: isLiked, author: author);
 
   static Meme mapFromEntity(MemeEntity entity) {
     switch (entity.type) {
@@ -60,7 +57,7 @@ class ImageMeme extends Meme {
   ImageMeme copy({String id, Uri uri, DateTime dateCreated, DateTime datePosted, String text, bool isLiked, String author}) {
     return ImageMeme(
       id ?? this.id,
-      uri ?? this.uri,
+      uri ?? this.path,
       dateCreated ?? this.dateCreated,
       datePosted: datePosted ?? this.datePosted,
       text: text ?? this.text,
@@ -74,7 +71,7 @@ class ImageMeme extends Meme {
   }
 
   static ImageMeme fromEntity(MemeEntity entity) {
-    return ImageMeme(entity.id, entity.uri, entity.dateCreated, datePosted: entity.datePosted, author: entity.author);
+    return ImageMeme(entity.id, Uri.parse(entity.path), entity.dateCreated, datePosted: entity.datePosted, author: entity.author);
   }
 }
 

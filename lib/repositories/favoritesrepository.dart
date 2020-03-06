@@ -1,13 +1,14 @@
 import 'dart:async';
+import 'package:leonpierre_mememaker/models/contentbase.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
+import 'package:leonpierre_mememaker/repositories/entities/contentbase.dart';
 import 'package:leonpierre_mememaker/repositories/entities/meme.dart';
-import 'package:leonpierre_mememaker/repositories/entities/memecluster.dart';
-import 'package:leonpierre_mememaker/repositories/entities/userlike.dart';
 import 'package:path/path.dart';
 import 'package:queries/collections.dart';
 import 'package:sqflite/sqflite.dart';
 
+//https://snowplowanalytics.com/blog/2018/03/26/building-a-model-for-atomic-event-data-as-a-graph/#the-next-post-in-the-series
 class FavoritesRepository {
   final String auditLikeAdded = "LIKE_ADDED";
   final String auditLikeRemoved = "LIKE_REMOVED";
@@ -18,102 +19,121 @@ class FavoritesRepository {
     //when a user goes to premium save
   }
 
-  Future<IEnumerable<UserLikeEntity>> getClusterFavoritesAsync(
-      IEnumerable<MemeClusterEntity> clusters) async {
+  Future<IEnumerable<MemeEntity>> getMemeFavoritesByHistory(DateTime start, DateTime end) async {
+    return await _initDatabaseInstance().then((database) async {
+      return await database.transaction((transaction) async {
+        List parameters = [ start, end ];
+        var favorites = await transaction.rawQuery(
+                //TODO: query should be datetime(b.timestamp,'unixepoch') as dateCreated but its currently unsupported
+                "SELECT memeId AS id, b.timestamp as dateCreated, memeType, path FROM meme_favorites WHERE timestamp BETWEEN ? AND ?", parameters);
+        var results = favorites.map((result) {
+          var clone = Map.of(result);
+          
+          //convert the int to datetime string
+          if(clone['dateCreated'] != null)
+            clone.update('dateCreated', (update) => DateTime.fromMicrosecondsSinceEpoch(result['dateCreated']).toString());
+            
+          return MemeEntity.fromJson(clone);
+        });
+
+        return Collection(results);
+      });
+    });
+  }
+
+  Future<IEnumerable<ContentBaseEntity>> getClusterFavoritesByEntity(IEnumerable<ContentBase> clusters) async {
     return await _initDatabaseInstance().then((database) async {
       return await database.transaction((transaction) async {
         String parameters = clusters.select((c) => "(?)").toList().join(',');
         return await transaction.rawQuery(
             "WITH clusterIds(clusterId) AS (VALUES $parameters) " +
-                "SELECT a.clusterId as id, CASE WHEN b.dateliked IS NULL THEN 'false' ELSE 'true' " +
-                "END As isLiked FROM clusterIds a " +
-                "LEFT JOIN cluster_likes b ON a.clusterId=b.clusterId",
+                "SELECT a.clusterId as id,  b.timestamp as dateCreated, b.path as path," +
+                "CASE WHEN b.timestamp IS NULL THEN 'false' ELSE 'true' END as isLiked " +
+                "FROM clusterIds a LEFT JOIN cluster_favorites b ON a.clusterId=b.clusterId",
             clusters.select((c) => c.id).toList());
       });
     }).then((results) =>
-        Collection(results.map((m) => UserLikeEntity.fromMap(m)).toList()));
-  }
-
-  Future<IEnumerable<UserLikeEntity>> getMemeFavoritesAsync(IEnumerable<MemeEntity> memes) async {
-    return await _initDatabaseInstance().then((database) async {
-        return database.transaction((transaction) async {
-          String parameterValues = memes.select((c) => "(?)").toList().join(',');
-          return await transaction.rawQuery("WITH memeIds(memeId) AS (VALUES $parameterValues) " +
-              "SELECT a.memeId as id, CASE WHEN b.dateliked IS NULL THEN 'false' ELSE 'true' END As isLiked FROM memeIds a " +
-              "LEFT JOIN meme_likes b ON a.memeId=b.memeId",
-          memes.select((m) => m.id).toList());
-        });
-      }).then((results) =>
-        Collection(results.map((m) => UserLikeEntity.fromMap(m)).toList()));
+        Collection(results.map((result) {
+          var clone = Map.of(result);
+          
+          //convert the int to datetime string
+          if(clone['dateCreated'] != null)
+            clone.update('dateCreated', (update) => DateTime.fromMicrosecondsSinceEpoch(result['dateCreated']).toString());
+            
+          return ContentBaseEntity.fromJson(clone);
+        }).toList()));
   }
 
   Future<bool> favoriteCluster(MemeCluster cluster, DateTime timestamp) async =>
       await _initDatabaseInstance().then((database) async {
-        int newLike = await database.insert(
-            'cluster_likes', {"clusterId": cluster.id, "dateLiked": timestamp.millisecondsSinceEpoch});
-        int audit = await database.insert('cluster_likes_audit', {
+        int newLike = await database.insert('cluster_favorites', { "clusterId": cluster.id, "path": cluster.path, "timestamp": timestamp.millisecondsSinceEpoch });
+        int audit = await database.insert('cluster_favorites_history', {
           "clusterId": cluster.id,
-          "auditTimestamp": timestamp.millisecondsSinceEpoch,
+          "timestamp": timestamp.millisecondsSinceEpoch,
           "actionId": auditLikeAdded
         });
-        return newLike == 1 && audit == 1;
+        return newLike > 0 && audit > 0;
+      }).catchError((error) {
+        throw error;
       });
 
-  Future<bool> removeClusterFavorite(MemeCluster cluster, DateTime timestamp) async =>
+  Future<bool> removeClusterFavorite(
+          MemeCluster cluster, DateTime timestamp) async =>
       await _initDatabaseInstance().then((database) async {
-        int deletedCluster = await database.delete('cluster_likes',
+        int deletedCluster = await database.delete('cluster_favorites',
             where: "clusterId = ?", whereArgs: [cluster.id]);
-        int audit = await database.insert('cluster_likes_audit', {
+        int audit = await database.insert('cluster_favorites_history', {
           "clusterId": cluster.id,
-          "auditTimestamp": timestamp.millisecondsSinceEpoch,
+          "timestamp": timestamp.millisecondsSinceEpoch,
           "actionId": auditLikeRemoved
         });
 
-        return deletedCluster == 1 && audit == 1;
+        return deletedCluster == 1 && audit > 0;
+      }).catchError((error) {
+
       });
 
-  Future<bool> favoriteMeme(Meme meme, DateTime timestamp) async {
-    final db = await _initDatabaseInstance();
+  Future<bool> favoriteMeme(Meme meme, DateTime timestamp) async =>
+      await _initDatabaseInstance().then((database) async {
+        int newLike = await database.insert('meme_favorites', 
+        { "memeId": meme.id, "path": meme.path, "memeType": meme.runtimeType.toString(), "timestamp": timestamp.millisecondsSinceEpoch });
+        int audit = await database.insert('meme_favorites_history', {
+          "memeId": meme.id,
+          "timestamp": timestamp.millisecondsSinceEpoch,
+          "actionId": auditLikeAdded
+        });
 
-    int newLike = await db
-        .insert('meme_likes', {"memeId": meme.id, "dateLiked": timestamp});
-    int audit = await db.insert('meme_likes_audit', {
-      "memeId": meme.id,
-      "auditTimestamp": timestamp.millisecondsSinceEpoch,
-      "actionId": auditLikeAdded
-    });
-
-    return newLike == 1 && audit == 1;
-  }
+        return newLike > 0 && audit > 0;
+      });
 
   Future<bool> removeMemeFavorite(Meme meme, DateTime timestamp) async =>
       await _initDatabaseInstance().then((database) async {
         int deletedLike = await database
-            .delete('meme_likes', where: "memeId = ?", whereArgs: [meme.id]);
-        int audit = await database.insert('meme_likes_audit', {
+            .delete('meme_favorites', where: "memeId = ?", whereArgs: [meme.id]);
+        int audit = await database.insert('meme_favorites_history', {
           "memeId": meme.id,
-          "auditTimestamp": timestamp.millisecondsSinceEpoch,
+          "timestamp": timestamp.millisecondsSinceEpoch,
           "actionId": auditLikeRemoved
         });
 
-        return deletedLike == 1 && audit == 1;
+        return deletedLike == 1 && audit > 0;
       });
 
   Future<Database> _initDatabaseInstance() async {
-    if (_database == null)
-      _database =
-          openDatabase(join(await getDatabasesPath(), 'user_database.db'),
-              onCreate: (db, version) {
-        db.execute(
-            "CREATE TABLE cluster_likes(clusterId TEXT PRIMARY KEY, dateLiked DATETIME)");
-        db.execute(
-            "CREATE TABLE cluster_likes_audit(clusterId TEXT, auditTimestamp DATETIME, actionId TEXT)");
-        db.execute(
-            "CREATE TABLE meme_likes(memeId TEXT PRIMARY KEY, dateLiked DATETIME)");
-        db.execute(
-            "CREATE TABLE meme_likes_audit(memeId TEXT, auditTimestamp DATETIME, actionId TEXT)");
-      }, version: 1);
+    var databasePath = join(await getDatabasesPath(), 'user_database.db');
+    //await deleteDatabase(databasePath);
 
+    if (_database == null)
+      _database = openDatabase(databasePath, onCreate: (db, version) {
+        db.execute(
+            "CREATE TABLE cluster_favorites(id INTEGER AUTO_INCREMENT, clusterId TEXT PRIMARY KEY, path TEXT, timestamp DATETIME)");
+        db.execute(
+            "CREATE TABLE cluster_favorites_history(id INTEGER AUTO_INCREMENT PRIMARY KEY, clusterId TEXT, timestamp DATETIME, actionId TEXT)");
+        db.execute(
+            "CREATE TABLE meme_favorites(id INTEGER AUTO_INCREMENT, memeId TEXT PRIMARY KEY, memeType TEXT, path TEXT, timestamp DATETIME)");
+        db.execute(
+            "CREATE TABLE meme_favorites_history(id INTEGER AUTO_INCREMENT PRIMARY KEY, memeId TEXT, timestamp DATETIME, actionId TEXT)");
+      }, version: 1);
 
     return await _database;
   }

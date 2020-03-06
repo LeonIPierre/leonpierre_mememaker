@@ -1,6 +1,7 @@
 //import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:leonpierre_mememaker/services/analytics/AnalyticsService.dart';
 
+//https://developers.facebook.com/docs/app-events/best-practices/ecom-and-retail
 class FacebookAppEventService extends AnalyticsService{
   //final facebookAppEvents = FacebookAppEvents();
 

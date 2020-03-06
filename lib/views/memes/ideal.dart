@@ -63,7 +63,7 @@ class _MemesViewComponentState extends State<MemesViewComponent> {
       case ImageMeme:
       case GifMeme:
       case VideoMeme:
-        return Image.network(meme.uri.toString(), fit: BoxFit.scaleDown);
+        return Image.network(meme.path.toString(), fit: BoxFit.scaleDown);
       default:
         throw Exception("Illegal type exception");
     }

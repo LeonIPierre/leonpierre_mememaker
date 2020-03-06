@@ -1,51 +1,30 @@
-import 'package:equatable/equatable.dart';
-import 'package:leonpierre_mememaker/models/memecluster.dart';
-import 'package:leonpierre_mememaker/models/mememodel.dart';
-import 'package:leonpierre_mememaker/repositories/entities/userlike.dart';
+import 'package:leonpierre_mememaker/models/contentbase.dart';
 import 'package:queries/collections.dart';
 
-abstract class FavoritesState extends Equatable {
+abstract class FavoritesState {
   const FavoritesState();
-
-    @override
-  List<Object> get props => [];
 }
 
 class FavoritesEmptyState extends FavoritesState {}
 
-class MemeClusterFavoritesLoadedState extends FavoritesState {
-  final IEnumerable<UserLikeEntity> favorites;
-
-  MemeClusterFavoritesLoadedState(this.favorites);
-
-  @override
-  List<Object> get props => [favorites];
-}
-
-class MemeClusterAndMemesFavoritesLoadedState extends FavoritesState {
-  final IEnumerable<MemeCluster> clusters;
-
-  MemeClusterAndMemesFavoritesLoadedState(this.clusters);
-
-  @override
-  List<Object> get props => [clusters];
-}
-
 class FavoritesErrorState extends FavoritesState {}
 
-class MemeClusterFavoritedStateChanged extends FavoritesState {
-  final MemeCluster cluster;
+class FavoritedContentLoadedState<T extends ContentBase> extends FavoritesState {
+  final IEnumerable<T> items;
+  final bool hasReachedMax;
 
-  MemeClusterFavoritedStateChanged(this.cluster);
-
-  @override
-  List<Object> get props => [cluster];
+  FavoritedContentLoadedState(this.items, {this.hasReachedMax});
 }
 
-class MemeFavoritedStateChanged extends FavoritesState {
-  final Meme meme;
-  MemeFavoritedStateChanged(this.meme);
-  
-  @override
-  List<Object> get props => [meme];
+class FavoritedContentLoadedByDateRangeState<T extends ContentBase> extends FavoritedContentLoadedState<T> {
+  final DateTime start;
+  final DateTime end;
+
+  FavoritedContentLoadedByDateRangeState(IEnumerable<T> items, this.start, this.end, {bool hasReachedMax}) : super(items, hasReachedMax: hasReachedMax);
+}
+
+class FavoritedContentChangedState<T extends ContentBase> extends FavoritesState {
+  final T content;
+
+  FavoritedContentChangedState(this.content);
 }

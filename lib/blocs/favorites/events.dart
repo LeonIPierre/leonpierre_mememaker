@@ -1,24 +1,29 @@
 import 'package:equatable/equatable.dart';
-import 'package:leonpierre_mememaker/models/memecluster.dart';
-import 'package:leonpierre_mememaker/repositories/entities/meme.dart';
-import 'package:leonpierre_mememaker/repositories/entities/memecluster.dart';
-import 'package:leonpierre_mememaker/repositories/entities/userlike.dart';
+import 'package:leonpierre_mememaker/models/contentbase.dart';
 import 'package:queries/collections.dart';
 
 enum FavoritesEventId {
+  //empty
+  FavoritesUnitialized,
+  FavoritesEmpty,
+
+  //loading
+  LoadFavoritesByEntities,
   LoadFavoritedClustersAndMemes,
+  LoadFavoritedMemeClusters,
+  LoadFavoritedMemes,
 
+  //ideal
   MemeClusterFavoritesLoaded,
-  LoadMemeClusterFavorites,
-
   MemeFavoritesLoaded,
-  LoadMemeFavorites,
-
+  
+  //partial
   MemeClusterAdded,
   MemeClusterRemoved,
-
   MemeAdded,
   MemeRemoved
+  
+  //error
 }
 
 abstract class FavoritesEvent extends Equatable {
@@ -26,39 +31,37 @@ abstract class FavoritesEvent extends Equatable {
   const FavoritesEvent(this.id);
 }
 
-class FavoritesLoaded extends FavoritesEvent {
-  final IEnumerable<UserLikeEntity> favorites;
+class FavoritesLoadEvent extends FavoritesEvent {
+  const FavoritesLoadEvent(FavoritesEventId id): super(id);
 
-  FavoritesLoaded(FavoritesEventId id, this.favorites) : super(id);
+  @override
+  List<Object> get props => [id];
+}
+
+class FavoritesLoadedEvent<T extends ContentBase> extends FavoritesEvent {
+  final IEnumerable<T> favorites;
+
+  FavoritesLoadedEvent(FavoritesEventId id, this.favorites) : super(id);
 
   @override
   List<Object> get props => [id, favorites];
 }
 
-class MemeClusterFavoritesLoad extends FavoritesEvent {
-  final IEnumerable<MemeClusterEntity> clusters;
+class FavoritesByContentLoadEvent<T extends ContentBase> extends FavoritesEvent {
+  final IEnumerable<T> items;
 
-  MemeClusterFavoritesLoad(FavoritesEventId id, this.clusters) : super(id);
-
-  @override
-  List<Object> get props => [clusters];
-}
-
-class MemeFavoritesLoad extends FavoritesEvent {
-  final IEnumerable<MemeEntity> memes;
-
-  MemeFavoritesLoad(this.memes) : super(FavoritesEventId.LoadMemeFavorites);
+  FavoritesByContentLoadEvent(FavoritesEventId id, this.items) : super(id);
 
   @override
-  List<Object> get props => [memes];
+  List<Object> get props => [id, items];
 }
 
-class MemeClusterFavoriteStateChangedEvent extends FavoritesEvent {
-  final MemeCluster cluster;
+class FavoriteStateChangedEvent<T extends ContentBase> extends FavoritesEvent {
+  final T item;
 
-  MemeClusterFavoriteStateChangedEvent(FavoritesEventId id, this.cluster)
+  FavoriteStateChangedEvent(FavoritesEventId id, this.item)
       : super(id);
 
   @override
-  List<Object> get props => [cluster];
+  List<Object> get props => [id, item];
 }

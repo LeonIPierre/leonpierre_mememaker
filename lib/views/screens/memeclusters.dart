@@ -19,7 +19,7 @@ class _MemeClusterWidgetState extends State<MemeClustersPage> {
           else if (state is MemeClusterErrorState)
             return MemeClustersErrorWidget(id: state.message);
           else if (state is MemeClusterIdealState)
-            return MemeClustersWidget(clusters: state.clusters);
+            return MemeClustersWidget();
           else if (state is MemeClusterLoadingState)
             return MemeClustersLoadingWidget();
 
