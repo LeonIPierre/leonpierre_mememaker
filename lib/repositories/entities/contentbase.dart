@@ -5,10 +5,10 @@ class ContentBaseEntity extends Equatable {
   final String path;
   final DateTime dateLiked;
 
-  ContentBaseEntity(this.id, { this.path, this.dateLiked });
+  const ContentBaseEntity(this.id, { this.path, this.dateLiked });
 
   factory ContentBaseEntity.fromJson(Map<String, dynamic> json) {
-    return ContentBaseEntity(json['id'], path: json['path'], dateLiked: json['dateCreated'] == null ? null : DateTime.parse(json['dateCreated']));
+    return ContentBaseEntity(json['id'], path: json['path'], dateLiked: json['dateLiked'] == null ? null : DateTime.parse(json['dateLiked']));
   }
   
   @override

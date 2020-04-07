@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:leonpierre_mememaker/models/contentbase.dart';
+import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
 
 class ContentWidget extends StatelessWidget {
-  final ContentBase meme;
+  final ContentBase item;
 
-  ContentWidget(this.meme);
+  ContentWidget(this.item);
 
   @override
   Widget build(BuildContext context) {
-    
-
-    return _buildMeme(meme);
+    if(item is MemeCluster)
+      return Text((item as MemeCluster).description);
+    else
+     return _buildMeme(item);
   }
 
   Widget _buildMeme(Meme meme) {

@@ -9,12 +9,14 @@ class MemeEntity extends ContentBaseEntity {
   final String type;
 
   MemeEntity(String id, String path, this.type,
-      {this.dateCreated, this.datePosted, this.author}) : super(id, path: path);
-
+      {this.dateCreated, this.datePosted, this.author, DateTime dateLiked}) 
+      : super(id, path: path, dateLiked: dateLiked);
+      
   factory MemeEntity.fromJson(Map<String, dynamic> json) =>
       MemeEntity(json['id'], json['url'], json['type'],
-          dateCreated: DateTime.parse(json['dateCreated']),
-          datePosted: DateTime.parse(json['datePosted']),
+          dateLiked: json['dateLiked'] == null ? null : DateTime.parse(json['dateLiked']),
+          dateCreated: json['dateCreated'] == null ? null : DateTime.parse(json['dateCreated']),
+          datePosted: json['datePosted'] == null ? null : DateTime.parse(json['datePosted']),
           author: json['author']);
 
   @override

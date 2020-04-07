@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
-import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
@@ -8,17 +6,19 @@ import 'package:leonpierre_mememaker/blocs/favorites/states.dart';
 import 'package:leonpierre_mememaker/models/contentbase.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
-import 'package:leonpierre_mememaker/repositories/entities/meme.dart';
-import 'package:leonpierre_mememaker/repositories/entities/memecluster.dart';
 import 'package:leonpierre_mememaker/repositories/favoritesrepository.dart';
 import 'package:queries/collections.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
-  Stream<List<ContentBase>> get favorites => _favoritesSubject.stream;
-
-  final Set<ContentBase> _favoritesList = Set<ContentBase>();
-  final BehaviorSubject<List<ContentBase>> _favoritesSubject = BehaviorSubject<List<ContentBase>>();
+  BehaviorSubject<Set<ContentBase>> get favorites => Stream.fromFuture(_clusterFavoritesSubject.addStream(_memeFavoritesSubject.stream));
+  BehaviorSubject<Set<ContentBase>> get clusterFavorites => _clusterFavoritesSubject.stream;
+  BehaviorSubject<Set<ContentBase>> get memeFavorites => _memeFavoritesSubject.stream;
+  
+  final Set<ContentBase> _clusterFavorites = Set<ContentBase>();
+  final Set<ContentBase> _memeFavorites = Set<ContentBase>();
+  final BehaviorSubject<Set<ContentBase>> _clusterFavoritesSubject = BehaviorSubject<Set<ContentBase>>();
+  final BehaviorSubject<Set<ContentBase>> _memeFavoritesSubject = BehaviorSubject<Set<ContentBase>>();
   final FavoritesRepository _favoritesRepository;
 
   FavoritesBloc(this._favoritesRepository);
@@ -30,174 +30,189 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   Stream<FavoritesState> mapEventToState(FavoritesEvent event) async* {
     switch (event.id) {
       case FavoritesEventId.FavoritesUnitialized:
-        var start = DateTime.now();
-        var end = start.subtract(Duration(days: 7));
-        var entities = await _favoritesRepository.getMemeFavoritesByHistory(start, end);
-
-        if (entities.any()) {
-          var memes = entities.select((x) => Meme.mapFromEntity(x));
-
-          _favoritesList.addAll(memes.asIterable());
-          _favoritesSubject.add(UnmodifiableListView(_favoritesList));
-          //var start = entities.orderBy((x) => x.dateLiked).toList().first.dateLiked;
-          //var end = start.subtract(Duration(days: 7));
-
-          yield FavoritedContentLoadedByDateRangeState(memes, start, end, hasReachedMax: false);
-        } else {
-          yield FavoritesEmptyState();
-        }
+        var end = DateTime.now();
+        var start = end.subtract(Duration(days: 7));
+        yield* _mapUnitializedState(start, end);
         break;
       case FavoritesEventId.LoadFavoritedMemeClusters:
-      //case FavoritesEventId.LoadFavoritedMemes:
-        if (state is FavoritedContentLoadedByDateRangeState) {
-          var currentState = state as FavoritedContentLoadedByDateRangeState;
-          var currentMemes = currentState.items;
-          var entities = await _favoritesRepository.getMemeFavoritesByHistory(currentState.start, currentState.end);
-          var memes = entities.select((x) => Meme.mapFromEntity(x));
-
-          if (entities.any()) {
-            _favoritesList.addAll(memes.asIterable());
-            _favoritesSubject.add(UnmodifiableListView(_favoritesList));
-            yield FavoritedContentLoadedState<Meme>(currentMemes.concat(memes), hasReachedMax: false);
-          } else {
-            yield FavoritedContentLoadedState<Meme>(memes, hasReachedMax: true);
-          }
-        } else {
-            var items = (event as FavoritesByContentLoadEvent<MemeCluster>).items;
-            var entities = await _favoritesRepository.getClusterFavoritesByEntity(items);
-
-            if(entities.any()) {
-              var favorites = _mapClustersToFavorites(items, entities.select((x) => ContentBase.fromEntity(x)));
-              _favoritesList.addAll(favorites.where((x) => x.isLiked).asIterable());
-              _favoritesSubject.add(_favoritesList.toList());
-              yield FavoritedContentLoadedState<MemeCluster>(favorites);
-            } else {
-              yield FavoritesEmptyState();
-            }
-        }
+        yield* _mapFavoritesRequest(event as FavoritesByContentLoadEvent<MemeCluster>);
         break;
-
+      case FavoritesEventId.LoadFavoritedMemes:
+        var memes = (state as FavoritedContentLoadedState<Meme>).items;
+        var start = memes.last().dateCreated;
+        var end = start.subtract(Duration(days: 7));
+        yield* _mapLoadFavoriteMemesState(start, end);
+        break;
       case FavoritesEventId.MemeClusterAdded:
-        var cluster = (event as FavoriteStateChangedEvent<MemeCluster>).item;
-        var success = await _favoritesRepository.favoriteCluster(cluster, DateTime.now());
-        var clone = cluster.clone(isLiked: true);
-
-        if(success && _favoritesList.add(clone)) {
-          var list = _favoritesList.where((x) => x.runtimeType == MemeCluster).map((x) => x as MemeCluster).toList();
-          _favoritesSubject.add(list);
-          
-          yield FavoritedContentChangedState(clone);
-        } else {
-          yield FavoritesErrorState();
-        }
+        yield* _mapMemeClusterAddedState(event as FavoriteStateChangedEvent<MemeCluster>);
         break;
       case FavoritesEventId.MemeClusterRemoved:
-        var cluster = (event as FavoriteStateChangedEvent<MemeCluster>).item;
-        var success = await _favoritesRepository.removeClusterFavorite(cluster, DateTime.now());
-        var clone = cluster.clone(isLiked: false);
-
-        if(success && _favoritesList.remove(cluster)) {
-          var list = _favoritesList.where((x) => x.runtimeType == MemeCluster).map((x) => x as MemeCluster).toList();
-          _favoritesSubject.add(list);
-          
-          yield FavoritedContentChangedState(clone);
-        } else {
-          yield FavoritesErrorState();
-        }
+        yield* _mapMemeClusterRemovedState(event as FavoriteStateChangedEvent<MemeCluster>);
         break;
-      // case FavoritesEventId.MemeAdded:
-      //   var meme = (event as FavoriteStateChangedEvent<Meme>).item;
-      //   var success =
-      //       await _favoritesRepository.favoriteMeme(meme, DateTime.now());
-
-      //   if (success) {
-      //     _favoritesList.add(meme);
-      //     _favoritesSubject.add(UnmodifiableListView(_favoritesList));
-      //     //yield FavoritedContentChangedState(meme);
-      //   } else {
-      //     yield FavoritesErrorState();
-      //   }
-      //   break;
-      // case FavoritesEventId.MemeRemoved:
-      //   var meme = (event as FavoriteStateChangedEvent).item;
-      //   var success =
-      //       await _favoritesRepository.removeMemeFavorite(meme, DateTime.now());
-
-      //   if (success) {
-      //     _favoritesList.remove(meme);
-      //     _favoritesSubject.add(UnmodifiableListView(_favoritesList));
-      //     yield FavoritedContentChangedState(meme);
-      //   } else {
-      //     yield FavoritesErrorState();
-      //   }
-      //   break;
+      case FavoritesEventId.MemeAdded:
+        yield* _mapMemeAddedState(event as FavoriteStateChangedEvent<Meme>);
+        break;
+      case FavoritesEventId.MemeRemoved:
+        yield* _mapMemeRemovedState(event as FavoriteStateChangedEvent<Meme>);
+        break;
       default:
-        yield state;
+        throw Exception("Invalid error ${event.id}");
     }
   }
 
-  void dispose() {
-    _favoritesSubject.close();
+  @override
+  Future<void> close() {
+    _favoritesRepository.dispose();
+    _clusterFavoritesSubject.close();
+    _memeFavoritesSubject.close();
+    return super.close();
   }
 
-  IEnumerable<MemeCluster> _mapClustersToFavorites(IEnumerable<MemeCluster> items, IEnumerable<ContentBase> favorites) {
-    return items.join(favorites, (item) => item.id, (ContentBase fav) => fav.id, (item, ContentBase fav) => 
-      MemeCluster(item.id, memes: item.memes, description: item.description, isLiked: fav.isLiked));
+  bool _hasReachedMax(FavoritesState state) =>
+      state is FavoritedContentLoadedState && state.hasReachedMax;
+
+  Stream<FavoritesState> _mapUnitializedState(DateTime start, DateTime end) async* {
+    yield await _favoritesRepository.getMemesByHistory(start, end).then((entities){
+      if (!entities.any()) {
+        return FavoritesEmptyState();
+      }
+
+      var memes = entities.select((x) => Meme.mapFromEntity(x)).where((x) => x.isLiked);
+
+      _memeFavorites.addAll(memes.asIterable());
+      _memeFavoritesSubject.add(_memeFavorites);
+      
+      return FavoritedContentLoadedByDateRangeState(memes, start, end, hasReachedMax: false);
+    });
   }
 
+  Stream<FavoritesState> _mapLoadFavoriteMemesState(DateTime start, DateTime end) async* {
+    if (_hasReachedMax(state)) {
+      return;
+    }
+
+    var entities = await _favoritesRepository.getMemesByHistory(start, end);
+
+    if (entities.any()) {
+      var memes = entities.select((x) => Meme.mapFromEntity(x));
+
+      _memeFavorites.addAll(memes.asIterable());
+      _memeFavoritesSubject.add(_memeFavorites);
+
+      yield FavoritedContentLoadedByDateRangeState<Meme>(memes, start, end);
+    } else {
+      var memes = (state as FavoritedContentLoadedState).items;
+      yield FavoritedContentLoadedState<Meme>(memes, hasReachedMax: true);
+    }
+  }
+
+  Stream<FavoritesState> _mapFavoritesRequest(FavoritesByContentLoadEvent<MemeCluster> event) async* {
+    yield await _favoritesRepository.mapClustersToFavorites(event.items)
+    .then((entities) {
+      return entities.select((x) => ContentBase.fromEntity(x));
+    })
+    .then((clusterEntities) async {
+      return await _favoritesRepository
+        .mapMemesToFavorites(event.items.selectMany((x) => x.memes).toList())
+        .then((entities) {
+          return entities.select((x) => ContentBase.fromEntity(x));
+        })
+        .then((memeEntities) {
+          var favorites = _mapClustersToFavorites(event.items, clusterEntities, memeEntities);
+          var clusterLikes = favorites.where((x) => x.isLiked);
+          var memeLikes = favorites.selectMany((x) => x.memes).where((x) => x.isLiked);
+
+          if(clusterLikes.any()) {
+             _clusterFavorites.addAll(clusterLikes.asIterable());
+             _clusterFavoritesSubject.add(_clusterFavorites);
+          }
+
+          if(memeLikes.any()) {
+             _memeFavorites.addAll(memeLikes.asIterable());
+             _memeFavoritesSubject.add(_memeFavorites);
+          }
+
+          return FavoritedContentRequestedState<MemeCluster>(favorites);
+        });
+    })
+    .catchError((error) { 
+      return FavoritesErrorState();
+    });
+  }
+
+  Stream<FavoritesState> _mapMemeClusterAddedState(FavoriteStateChangedEvent<MemeCluster> event) async* {
+    var cluster = event.item;
+    var success = await _favoritesRepository.favoriteCluster(cluster, DateTime.now());
+    var clone = cluster.clone(isLiked: true);
+
+    _clusterFavorites.removeWhere((x) => x.id == clone.id);
+
+    if (success && _clusterFavorites.add(clone)) {
+      //want to do a replace or add
+      _clusterFavoritesSubject.add(_clusterFavorites);
+      yield FavoritedContentChangedState(clone);
+    } else {
+      yield FavoritesErrorState();
+    }
+  }
+
+  Stream<FavoritesState> _mapMemeClusterRemovedState(FavoriteStateChangedEvent<MemeCluster> event) async* {
+    var cluster = event.item;
+    var success = await _favoritesRepository.removeClusterFavorite(cluster, DateTime.now());
+    var clone = cluster.clone(isLiked: false);
+
+    if (success && _clusterFavorites.remove(cluster)) {
+      _clusterFavoritesSubject.add(_clusterFavorites);
+      yield FavoritedContentChangedState(clone);
+    } else {
+      yield FavoritesErrorState();
+    }
+  }
+
+  Stream<FavoritesState> _mapMemeAddedState(FavoriteStateChangedEvent<Meme> event) async* {
+    yield await _favoritesRepository.favoriteMeme(event.item, DateTime.now())
+    .then((success) {
+      var clone = event.item.cloneWithProps(isLiked: true);
+
+      _memeFavorites.removeWhere((x) => x.id == clone.id);
+      
+      if (success && _memeFavorites.add(clone)) {
+        _memeFavoritesSubject.add(_memeFavorites);
+        return FavoritedContentChangedState(clone);
+      } else {
+        return FavoritesErrorState();
+      }
+    });
+  }
   
-  // Future<IEnumerable<MemeCluster>> _getMappedClustersToFavorites(
-  //     IEnumerable<MemeClusterEntity> clusterEntities) async {
-  //   return await _favoritesRepository
-  //       .getClusterFavoritesByEntity(clusterEntities)
-  //       .then((userClusterLikes) {
-  //     return clusterEntities.join(
-  //         userClusterLikes,
-  //         (entity) => entity.id,
-  //         (favorite) => (favorite as UserLikeEntity).contentId,
-  //         (entity, favorite) =>
-  //             {"entity": entity, "like": favorite as UserLikeEntity});
-  //   }).then((mappedClusters) async {
-  //     var clusters = List<MemeCluster>();
-  //     final clusterFutures = <Future<void>>[];
+  Stream<FavoritesState> _mapMemeRemovedState(FavoriteStateChangedEvent<Meme> event) async* {
+    yield await _favoritesRepository.removeMemeFavorite(event.item, DateTime.now())
+    .then((success) {
+      if (success && _memeFavorites.remove(event.item)) {
+        _memeFavoritesSubject.add(_memeFavorites);
+        var clone = event.item.cloneWithProps(isLiked: false);
+        return FavoritedContentChangedState(clone);
+      } else {
+        return FavoritesErrorState();
+      }
+    });
+  }
 
-  //     //TODO: run 1 query for all memes then map them back to the clusters
-  //     mappedClusters.toList().forEach((mappedCluster) {
-  //       var entity = mappedCluster["entity"] as MemeClusterEntity;
-  //       var like = mappedCluster["like"] as UserLikeEntity;
+  IEnumerable<MemeCluster> _mapClustersToFavorites(
+      IEnumerable<MemeCluster> items, IEnumerable<ContentBase> clusterFavorites,
+      [IEnumerable<ContentBase> memeFavorites]) {
+    return items.join(
+        clusterFavorites,
+        (item) => item.id,
+        (ContentBase fav) => fav.id,
+        (item, ContentBase fav) => MemeCluster(item.id,
+            memes: _mapMemesToFavorites(item.memes, memeFavorites),
+            description: item.description,
+            isLiked: fav.isLiked));
+  }
 
-  //       clusterFutures.add(_mapMemesToFavorites(entity.memes)
-  //           .then((memes) => MemeCluster(entity.id,
-  //               memes: memes,
-  //               description: entity.description,
-  //               isLiked: like.isLiked))
-  //           .then((cluster) => clusters.add(cluster)));
-  //     });
-
-  //     return await Future.wait(clusterFutures).then((value) {
-  //       return Collection(clusters);
-  //     }).catchError((error) {
-  //       throw Exception("Error when mapping cluster to favorites");
-  //     });
-  //   });
-  // }
-
-  // Future<IEnumerable<Meme>> _mapMemesToFavorites(
-  //         IEnumerable<MemeEntity> memes) async =>
-  //     await _favoritesRepository
-  //         .getMemeFavoritesByEntity(memes)
-  //         .then((userLikes) => memes.join(
-  //             userLikes,
-  //             (entity) => entity.id,
-  //             (favorite) => (favorite as UserLikeEntity).contentId,
-  //             (entity, favorite) => Meme.mapFromCopy(entity.type,
-  //                 id: entity.id,
-  //                 uri: entity.uri,
-  //                 dateCreated: entity.dateCreated,
-  //                 datePosted: entity.datePosted,
-  //                 isLiked: (favorite as UserLikeEntity).isLiked,
-  //                 author: entity.author)))
-  //         .catchError((error) {
-  //       throw Exception("Error thrown when trying to map meme to favorites");
-  //     });
+  IEnumerable<Meme> _mapMemesToFavorites(IEnumerable<Meme> memes, IEnumerable<ContentBase> favorites) {
+    return memes.join(favorites, (item) => item.id, (ContentBase fav) => fav.id,
+        (item, ContentBase fav) => item.cloneWithProps(isLiked: fav.isLiked));
+  }
 }

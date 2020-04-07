@@ -12,20 +12,20 @@ class FavoritesIdealWidget extends StatefulWidget {
 }
 
 class _FavoritesIdealWidgetState extends State<FavoritesIdealWidget> {
+  
   @override
   Widget build(BuildContext context) {
     final FavoritesBloc bloc = BlocProvider.of<FavoritesBloc>(context);
 
     return StreamBuilder(
-        stream: bloc.favorites,
-        builder: (BuildContext context, AsyncSnapshot<List<ContentBase>> snapshot) {
-          if (!snapshot.hasData) return Container();
-
+        stream: bloc.memeFavorites,
+        initialData: bloc.memeFavorites.value,
+        builder: (BuildContext context, AsyncSnapshot<Set<ContentBase>> snapshot) {
           return GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
               itemCount: snapshot.data.length,
               itemBuilder: (BuildContext context, int index) {
-                return ContentWidget(snapshot.data[index]);
+                return ContentWidget(snapshot.data.elementAt(index));
               });
         });
   }

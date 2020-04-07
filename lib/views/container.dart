@@ -23,27 +23,26 @@ class ScreensContainer extends StatefulWidget {
 }
 
 class _ScreensContainerState extends State<ScreensContainer> {
+  final _favoritesBloc = FavoritesBloc(FavoritesRepository());
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         title: Text("Title"),
       ),
-      body: BlocProvider(
-        create: (BuildContext context) => FavoritesBloc(FavoritesRepository()),
+      body: BlocProvider.value(
+        value: _favoritesBloc,
         child: StreamBuilder(
             stream: widget.navigation.pages,
             initialData: widget.navigation.navigation.value,
-            builder: (BuildContext context,
-                AsyncSnapshot<NavigationItemModel> snapshot) {
+            builder: (BuildContext context, AsyncSnapshot<NavigationItemModel> snapshot) {
               switch (snapshot.data.item) {
-
                 case NavigationItem.HOME:
                   return MultiBlocProvider(
                     providers: [
                       BlocProvider<MemeClusterBloc>(
                         create: (BuildContext context) => MemeClusterBloc(
-                          MemeClusterRepository(), BlocProvider.of<FavoritesBloc>(context)
-                          )..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters))
+                          MemeClusterRepository(), _favoritesBloc)
+                          ..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters))
                       ),
                       BlocProvider<ShareBloc>(create: (BuildContext context) => ShareBloc())
                     ],
@@ -51,8 +50,8 @@ class _ScreensContainerState extends State<ScreensContainer> {
                     child: MemeClustersPage()
                   );
                 case NavigationItem.FAVORITES:
-                  return BlocProvider(
-                      create: (context) => BlocProvider.of<FavoritesBloc>(context)..add(FavoritesLoadEvent(FavoritesEventId.LoadFavoritedMemes)),
+                  return BlocProvider.value(
+                      value: _favoritesBloc..add(FavoritesLoadEvent(FavoritesEventId.FavoritesUnitialized)),
                       child: FavoritesPage());
                 case NavigationItem.SEARCH:
                 default:
@@ -83,4 +82,10 @@ class _ScreensContainerState extends State<ScreensContainer> {
               setState(() {});
             });
       }));
+
+  @override
+  void dispose() {
+    _favoritesBloc.close();
+    super.dispose();
+  }
 }

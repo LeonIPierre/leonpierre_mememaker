@@ -24,6 +24,9 @@ class MemeClusterErrorState extends MemeClusterState {
   final String message;
 
   const MemeClusterErrorState(this.message);
+
+  @override
+  List<Object> get props => [message];
 }
 
 class MemeClusterLoadingState extends MemeClusterState {}

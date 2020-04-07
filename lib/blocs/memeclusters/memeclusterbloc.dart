@@ -6,19 +6,21 @@ import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/states.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
+import 'package:leonpierre_mememaker/models/mememodel.dart';
 import 'package:leonpierre_mememaker/repositories/memeclusterrepository.dart';
 import 'package:queries/collections.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
   BehaviorSubject<IEnumerable<MemeCluster>> clusters = BehaviorSubject<IEnumerable<MemeCluster>>();
+  //BehaviorSubject<List<ContentBase>> get clusters => _favoritesSubject.stream;
 
   final MemeClusterRepository _clusterRepository;
   final FavoritesBloc _favoritesBloc;
   StreamSubscription _favoritesStream;
   
   MemeClusterBloc(this._clusterRepository, this._favoritesBloc) {
-    initialize();
+    _initialize();
   }
 
   @override
@@ -28,10 +30,7 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
   Stream<MemeClusterState> mapEventToState(MemeClusterEvent event) async* {
     switch (event.id) {
       case MemeClusterEventId.LoadMemeClusters:
-        
-        var entities = await _clusterRepository.byNewestAsync();
-        var clusters = entities.select((x) => MemeCluster.fromEntity(x));
-        _favoritesBloc.add(FavoritesByContentLoadEvent(FavoritesEventId.LoadFavoritedMemeClusters, clusters));
+        yield* _mapMemeClusterLoadedState();
         break;
       case MemeClusterEventId.MemeClustersLoaded:
         var clusters = (event as MemeClustersLoadedEvent).clusters;
@@ -66,21 +65,8 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
         yield MemeClusterErrorState("Failed to load state $state");
         break;
       default:
-        yield state;
+        throw Exception("Cannot handle event ${event.id}");
     }
-  }
-
-  void initialize() {
-    _favoritesStream = _favoritesBloc.listen((state) {
-      if (state is FavoritedContentLoadedState<MemeCluster>) {
-        add(MemeClustersLoadedEvent(state.items));
-      }
-      else if(this.state is MemeClusterIdealState && state is FavoritedContentChangedState<MemeCluster>) {
-        var currentClusters = (this.state as MemeClusterIdealState).clusters;
-        var test = currentClusters.select((x) => x == state.content ? state.content : x);
-        add(MemeClustersLoadedEvent(test));
-      }
-    });
   }
 
   @override
@@ -88,5 +74,35 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
     clusters?.close();
     _favoritesStream?.cancel();
     return super.close();
+  }
+
+  void _initialize() {
+    _favoritesStream = _favoritesBloc.listen((favState) {
+      if (favState is FavoritedContentRequestedState<MemeCluster>) {
+        add(MemeClustersLoadedEvent(favState.items));
+      }
+      else if(favState is FavoritedContentChangedState<MemeCluster> && this.state is MemeClusterIdealState) {
+        var currentClusters = (this.state as MemeClusterIdealState).clusters;
+        add(MemeClustersLoadedEvent(currentClusters.select((x) => x.id == favState.content.id ? favState.content : x)));
+      }
+      else if(favState is FavoritedContentChangedState<Meme> &&  this.state is MemeClusterIdealState) {
+        var currentClusters = (this.state as MemeClusterIdealState).clusters;
+        var updatedClusters = currentClusters.select((cluster) =>
+          cluster.clone(memes: cluster.memes.select((x) => x.id == favState.content.id ? favState.content : x)));
+          
+        add(MemeClustersLoadedEvent(updatedClusters));
+      }
+
+    });
+  }
+
+  Stream<MemeClusterState> _mapMemeClusterLoadedState() async* {
+    yield await _clusterRepository.byNewestAsync().then((entities) {
+      var clusters = entities.select((x) => MemeCluster.fromEntity(x));
+      _favoritesBloc.add(FavoritesByContentLoadEvent(FavoritesEventId.LoadFavoritedMemeClusters, clusters));
+      return state;
+    }).catchError((ex) {
+      return MemeClusterErrorState(ex.toString());
+    });
   }
 }

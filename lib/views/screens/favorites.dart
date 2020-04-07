@@ -16,12 +16,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
   Widget build(BuildContext context) =>
       BlocBuilder<FavoritesBloc, FavoritesState>(
           builder: (BuildContext context, FavoritesState state) {
-            if(state is FavoritedContentLoadedState) {
-              return FavoritesIdealWidget();
-            } else if(state is FavoritesEmptyState) {
-              return FavoritesEmptyWidget();
-            }
+        if (state is FavoritedContentLoadedState) {
+          return FavoritesIdealWidget();
+        } else if (state is FavoritesEmptyState) {
+          return FavoritesEmptyWidget();
+        }
 
-            return Container();
-          });
+        return Container();
+      });
 }

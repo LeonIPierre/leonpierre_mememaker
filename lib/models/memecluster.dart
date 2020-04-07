@@ -8,20 +8,13 @@ class MemeCluster extends ContentBase {
   final IEnumerable<Meme> memes;
 
   const MemeCluster(id, {this.description, this.memes, bool isLiked}) : super(id, isLiked: isLiked);
-
-  @override
-  List<Object> get props => [id];
-
-  @override
-  bool operator ==(covariant MemeCluster other) => this.id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
-
-  MemeCluster clone({bool isLiked}) => MemeCluster(this.id, description: this.description, memes: this.memes, isLiked: isLiked);
+  
+  MemeCluster clone({IEnumerable<Meme> memes, bool isLiked}) => 
+    MemeCluster(this.id, description: this.description, memes: memes ?? this.memes, isLiked: isLiked ?? this.isLiked);
 
   static MemeCluster fromEntity(MemeClusterEntity entity) =>
       MemeCluster(entity.id,
           description: entity.description,
-          memes: entity.memes.select((m) => Meme.mapFromEntity(m)));
+          isLiked: entity.dateLiked != null,
+          memes: entity.memes == null ? null : entity.memes.select((m) => Meme.mapFromEntity(m)));
 }
