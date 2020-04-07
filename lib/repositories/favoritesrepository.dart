@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'package:leonpierre_mememaker/models/contentbase.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
 import 'package:leonpierre_mememaker/repositories/entities/contentbase.dart';
 import 'package:leonpierre_mememaker/repositories/entities/meme.dart';
-import 'package:leonpierre_mememaker/repositories/entities/memecluster.dart';
 import 'package:path/path.dart';
 import 'package:queries/collections.dart';
 import 'package:sqflite/sqflite.dart';
@@ -48,7 +46,6 @@ class FavoritesRepository {
         return await transaction.rawQuery(
             "WITH clusterIds(clusterId) AS (VALUES $parameters) " +
                 "SELECT a.clusterId as id,  b.timestamp as dateLiked, b.path as path " +
-                //"CASE WHEN b.timestamp IS NULL THEN 'false' ELSE 'true' END as isLiked " +
                 "FROM clusterIds a LEFT JOIN cluster_favorites b ON a.clusterId=b.clusterId",
             clusters.select((c) => c.id).toList());
       });
@@ -56,7 +53,7 @@ class FavoritesRepository {
     .then((results) => Collection(results.map((result) {
           var clone = Map.of(result);
           
-          //the MemeClusterEntity.fromJson expects datetime to be an string so convert it from int
+          //the ContentBaseEntity.fromJson expects datetime to be an string so convert it from int
           if(result['dateLiked'] != null)
             clone.update('dateLiked', (value) => DateTime.fromMicrosecondsSinceEpoch(value).toString());
             
@@ -72,7 +69,6 @@ class FavoritesRepository {
         return await transaction.rawQuery(
             "WITH memeIds(memeId) AS (VALUES $parameters) " +
             "SELECT a.memeId as id, b.timestamp as dateLiked, b.path as path " +
-            //"CASE WHEN b.timestamp IS NULL THEN 'false' ELSE 'true' END as isLiked " +
             "FROM memeIds a LEFT JOIN meme_favorites b ON a.memeId=b.memeId",
             memes.map((c) => c.id).toList());
       })
@@ -80,7 +76,7 @@ class FavoritesRepository {
         Collection(results.map((result) {
           var clone = Map.of(result);
           
-          //the MemeEntity.fromJson expects datetime to be an string so convert it from int
+          //the ContentBaseEntity.fromJson expects datetime to be an string so convert it from int
           if(result['dateLiked'] != null)
             clone.update('dateLiked', (value) => DateTime.fromMicrosecondsSinceEpoch(value).toString());
             
@@ -151,7 +147,6 @@ class FavoritesRepository {
 
   Future<Database> _initDatabaseInstance() async {
     var databasePath = join(await getDatabasesPath(), 'user_database.db');
-    //await deleteDatabase(databasePath);
 
     if (_database == null)
       _database = openDatabase(databasePath, onCreate: (db, version) {
@@ -166,6 +161,11 @@ class FavoritesRepository {
       }, version: 1);
 
     return await _database;
+  }
+
+  Future<void> _dropDatabase() async {
+    var databasePath = join(await getDatabasesPath(), 'user_database.db');
+    await deleteDatabase(databasePath).catchError((error) => _handleError(error));
   }
 
   void dispose() {
