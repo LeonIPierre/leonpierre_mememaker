@@ -77,6 +77,8 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
         return FavoritesEmptyState();
       }
 
+      /*TODO figure out why he the where clause needs to be here.
+      Removing it causes duplicate items to appear*/
       var memes = entities.select((x) => Meme.mapFromEntity(x)).where((x) => x.isLiked);
 
       _memeFavorites.addAll(memes.asIterable());

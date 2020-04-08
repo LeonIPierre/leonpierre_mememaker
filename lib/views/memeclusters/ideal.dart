@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:leonpierre_mememaker/blocs/components/share/events.dart';
-import 'package:leonpierre_mememaker/blocs/components/share/sharebloc.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
@@ -44,6 +42,7 @@ class _MemeClusterWidgetState extends State<MemeClustersWidget> {
                 children: <Widget>[
                   Row(children: <Widget>[
                     Expanded(flex: 2, child: Text(cluster.description ?? "PlaceHolder Text")),
+                    
                     IconButton(
                         icon: Icon(
                           cluster.isLiked ? Icons.favorite : Icons.favorite_border,
@@ -92,12 +91,15 @@ class _MemeClusterWidgetState extends State<MemeClustersWidget> {
             },
           ),
 
-          IconButton(
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: IconButton(
             icon: Icon(
               meme.isLiked ? Icons.favorite : Icons.favorite_border,
               color: meme.isLiked ? Colors.red : Colors.redAccent,),
-              onPressed: () => _toggleMemeLike(meme)),
-              
+              onPressed: () => _toggleMemeLike(meme)),),
+ 
           ShareWidget(),
         ],
       );

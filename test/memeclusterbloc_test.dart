@@ -11,8 +11,12 @@ void main() {
       MemeClusterRepository clusterRepository;
 
       setUp(() {
-        
         clusterBloc = MemeClusterBloc(clusterRepository, favoritesBloc);
+      });
+
+      tearDown(() {
+        clusterBloc.close();
+        favoritesBloc.close();
       });
     });
 }

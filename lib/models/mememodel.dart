@@ -14,7 +14,7 @@ abstract class Meme extends ContentBase {
   final List<String> tags;
 
   Meme(id, Uri locationPath, this.dateCreated,
-      {this.datePosted, isLiked, author, this.likes, this.tags}) :
+      {this.datePosted, bool isLiked, author, this.likes, this.tags}) :
       super(id, path: locationPath, isLiked: isLiked, author: author);
 
   Object clone({Meme copyFrom});
@@ -52,7 +52,7 @@ class AudioMeme extends TextMeme {
 }
 
 class GifMeme extends Meme {
-  GifMeme(String id, Uri uri, DateTime dateCreated)
+  GifMeme(String id, Uri uri, DateTime dateCreated, {bool isLiked})
       : super(id, uri, dateCreated);
 
   @override
@@ -62,8 +62,7 @@ class GifMeme extends Meme {
 
   @override
   Meme cloneWithProps({bool isLiked}) {
-    // TODO: implement cloneWithProps
-    return null;
+    return GifMeme(this.id, this.path, this.dateCreated, isLiked: isLiked);
   }
 }
 
@@ -96,8 +95,8 @@ class ImageMeme extends Meme {
 
 class TextMeme extends Meme {
   final String text;
-  TextMeme(String id, Uri uri, DateTime dateCreated, this.text)
-      : super(id, uri, dateCreated);
+  TextMeme(String id, Uri uri, DateTime dateCreated, this.text, {bool isLiked})
+      : super(id, uri, dateCreated, isLiked: isLiked);
 
   @override
   Object clone({Meme copyFrom}) {
@@ -106,8 +105,7 @@ class TextMeme extends Meme {
 
   @override
   Meme cloneWithProps({bool isLiked}) {
-    // TODO: implement cloneWithProps
-    return null;
+    return TextMeme(this.id, this.path, this.dateCreated, this.text);
   }
 }
 
@@ -116,17 +114,16 @@ class VideoMeme extends Meme {
   final int startPosition;
   final int endPosition;
   VideoMeme(String id, Uri uri, DateTime dateCreated,
-      [this.startPosition = 0, this.endPosition = 0])
+      {this.startPosition = 0, this.endPosition = 0, bool isLiked })
       : super(id, uri, dateCreated);
 
   @override
   Object clone({Meme copyFrom}) {
-    return VideoMeme(id, path, dateCreated, startPosition, endPosition);
+    return VideoMeme(id, path, dateCreated, startPosition: this.startPosition, endPosition: this.endPosition);
   }
 
   @override
   Meme cloneWithProps({bool isLiked}) {
-    // TODO: implement cloneWithProps
-    return null;
+    return VideoMeme(this.id, this.path, this.dateCreated, isLiked: isLiked);
   }
 }
