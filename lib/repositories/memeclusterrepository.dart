@@ -4,8 +4,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class MemeClusterRepository {
-  final String baseUrl = "https://leonipierre.ngrok.io/api/memes/clustered";
-
+  //final String baseUrl = "https://leonipierre.ngrok.io/api/memes/clustered";
+  final String baseUrl = "http://108.175.11.170/api/memes/clustered";
+  
   Future<IEnumerable<MemeClusterEntity>> byDateRangeAsync(
       DateTime start, DateTime end) async =>
       await _getResponse('$baseUrl/${start.toString()}/${end.toString()}').then((response) {
