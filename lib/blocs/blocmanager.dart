@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
+//import 'package:leonpierre_mememaker/main.dart';
 import 'package:dev_libraries/models/loggableevent.dart';
 import 'package:dev_libraries/models/loggablestate.dart';
-import 'package:dev_libraries/services/analyticsservice.dart';
-import 'package:dev_libraries/services/logservice.dart';
-
+import 'package:dev_libraries/services/analytics/analyticsservice.dart';
+import 'package:dev_libraries/services/logging/logservice.dart';
 
 class BlocManager extends BlocDelegate {
   final AnalyticsService _analyticsService;

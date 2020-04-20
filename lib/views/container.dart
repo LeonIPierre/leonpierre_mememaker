@@ -15,9 +15,9 @@ import 'package:leonpierre_mememaker/views/screens/memeclusters.dart';
 import 'screens/favorites.dart';
 
 class ScreensContainer extends StatefulWidget {
-  final NavigationBloc navigation;
+  final NavigationBloc navigationBloc;
 
-  ScreensContainer(this.navigation);
+  ScreensContainer(this.navigationBloc);
 
   createState() => _ScreensContainerState();
 }
@@ -32,8 +32,8 @@ class _ScreensContainerState extends State<ScreensContainer> {
       body: BlocProvider.value(
         value: _favoritesBloc,
         child: StreamBuilder(
-            stream: widget.navigation.pages,
-            initialData: widget.navigation.navigation.value,
+            stream: widget.navigationBloc.pages,
+            initialData: widget.navigationBloc.navigation.value,
             builder: (BuildContext context, AsyncSnapshot<NavigationItemModel> snapshot) {
               switch (snapshot.data.item) {
                 case NavigationItem.HOME:
@@ -74,10 +74,10 @@ class _ScreensContainerState extends State<ScreensContainer> {
                 title: Text('Favorites'),
               ),
             ],
-            currentIndex: widget.navigation.navigation.value.index,
+            currentIndex: widget.navigationBloc.navigation.value.index,
             selectedItemColor: Theme.of(context).primaryColor,
             onTap: (index) {
-              widget.navigation.toPage(index);
+              widget.navigationBloc.toPage(index);
               //notify ui of state change
               setState(() {});
             });
