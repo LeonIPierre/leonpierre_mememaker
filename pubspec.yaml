@@ -30,12 +30,8 @@ dependencies:
   path:
   dev_libraries:
     path: C:/Users/dqa6235/projects/leonpierre_libraries/dev_libraries
-  #appspector: '0.1.0'
-
-  #facebook_app_events: ^0.5.0
-  #usage: ^3.4.1
-
-  #framwork
+    
+  #framework
   bloc: ^3.0.0
   flutter_bloc: ^3.1.0
   
