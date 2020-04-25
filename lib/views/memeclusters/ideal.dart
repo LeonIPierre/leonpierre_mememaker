@@ -13,7 +13,8 @@ import 'package:leonpierre_mememaker/views/components/share.dart';
 import 'package:queries/collections.dart';
 
 class MemeClustersWidget extends StatefulWidget {
-  MemeClustersWidget({Key key}) : super(key: key);
+  final MemeClusterBloc clusterBloc;
+  MemeClustersWidget(this.clusterBloc, {Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _MemeClusterWidgetState();
@@ -31,8 +32,8 @@ class _MemeClusterWidgetState extends State<MemeClustersWidget> {
     _favoritesBloc = BlocProvider.of<FavoritesBloc>(context);
     
     return StreamBuilder<IEnumerable<MemeCluster>>(
-      stream: BlocProvider.of<MemeClusterBloc>(context).clusters.stream,
-      initialData: BlocProvider.of<MemeClusterBloc>(context).clusters.stream.value,
+      stream: widget.clusterBloc.clusters.stream,
+      initialData: widget.clusterBloc.clusters.stream.value,
       builder: (context, snapshot) {
         return Swiper(
             itemBuilder: (BuildContext context, int index) {

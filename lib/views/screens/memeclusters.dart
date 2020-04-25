@@ -14,18 +14,13 @@ class _MemeClusterWidgetState extends State<MemeClustersPage> {
   Widget build(BuildContext context) =>
       BlocBuilder<MemeClusterBloc, MemeClusterState>(
         builder: (BuildContext context, MemeClusterState state) {
-          
-          
+            
           if (state is MemeClusterEmptyState)
             return MemeClustersEmptyWidget();
           else if (state is MemeClusterErrorState)
             return MemeClustersErrorWidget(id: state.message);
           else if (state is MemeClusterIdealState)
-          {
-            //var adBloc = AdBloc(AdMobService(null));
-            //adBloc.add(AdLoadEvent(AdType.Banner));
-            return MemeClustersWidget();
-          }
+            return MemeClustersWidget(BlocProvider.of<MemeClusterBloc>(context));
           else if (state is MemeClusterLoadingState)
             return MemeClustersLoadingWidget();
 

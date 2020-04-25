@@ -1,6 +1,8 @@
+import 'package:dev_libraries/dev_libraries.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leonpierre_mememaker/blocs/appbloc.dart';
 import 'package:leonpierre_mememaker/blocs/components/share/sharebloc.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
@@ -8,55 +10,43 @@ import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/blocs/navigation.dart';
 import 'package:leonpierre_mememaker/models/navigationItem.dart';
-import 'package:leonpierre_mememaker/repositories/favoritesrepository.dart';
 import 'package:leonpierre_mememaker/repositories/memeclusterrepository.dart';
 import 'package:leonpierre_mememaker/views/screens/memeclusters.dart';
 
+import 'components/ads.dart';
 import 'screens/favorites.dart';
 
-class ScreensContainer extends StatefulWidget {
+class AppContainer extends StatefulWidget {
   final NavigationBloc navigationBloc;
+  final AppBloc _appBloc;
+  final FavoritesBloc _favoritesBloc;
 
-  ScreensContainer(this.navigationBloc);
+  AppContainer(this.navigationBloc, this._appBloc, this._favoritesBloc);
 
-  createState() => _ScreensContainerState();
+  createState() => _AppContainerState();
 }
 
-class _ScreensContainerState extends State<ScreensContainer> {
-  final _favoritesBloc = FavoritesBloc(FavoritesRepository());
+class _AppContainerState extends State<AppContainer> {
   @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(
-        title: Text("Title"),
-      ),
+  Widget build(BuildContext context) {
+   return Scaffold(
+      appBar: AppBar(title: Text(widget._appBloc.configuration["system:title"])),
       body: BlocProvider.value(
-        value: _favoritesBloc,
+        value: widget._favoritesBloc,
         child: StreamBuilder(
             stream: widget.navigationBloc.pages,
             initialData: widget.navigationBloc.navigation.value,
             builder: (BuildContext context, AsyncSnapshot<NavigationItemModel> snapshot) {
-              switch (snapshot.data.item) {
-                case NavigationItem.HOME:
-                  return MultiBlocProvider(
-                    providers: [
-                      BlocProvider<MemeClusterBloc>(
-                        create: (BuildContext context) => MemeClusterBloc(
-                          MemeClusterRepository(), _favoritesBloc)
-                          ..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters))
-                      ),
-                      BlocProvider<ShareBloc>(create: (BuildContext context) => ShareBloc())
-                    ],
-
-                    child: MemeClustersPage()
-                  );
-                case NavigationItem.FAVORITES:
-                  return BlocProvider.value(
-                      value: _favoritesBloc..add(FavoritesLoadEvent(FavoritesEventId.FavoritesUnitialized)),
-                      child: FavoritesPage());
-                case NavigationItem.SEARCH:
-                default:
-                  return null;
-              }
+              //return _buildPage(snapshot.data.item);
+              
+              return Column(
+                children: <Widget>[
+                   Expanded(child: _buildPage(snapshot.data.item), flex: 10),
+                   Expanded(flex: 1,
+                     child: AdsWidget(AdBloc(widget._appBloc.configuration["appId"].toString(), configuration: widget._appBloc.configuration)),
+                    ),
+                ],
+              );
             }),
       ),
 
@@ -82,10 +72,43 @@ class _ScreensContainerState extends State<ScreensContainer> {
               setState(() {});
             });
       }));
+  }
 
   @override
   void dispose() {
-    _favoritesBloc.close();
+    widget._appBloc.close();
+    widget._favoritesBloc.close();
     super.dispose();
+  }
+
+  Widget _buildPage(NavigationItem navigationItem) {
+    switch (navigationItem) {
+      case NavigationItem.HOME:
+        return _buildHomePage();
+      case NavigationItem.FAVORITES:
+        return _buildFavoritesPage();
+      case NavigationItem.SEARCH:
+      default:
+        return null;
+    }
+  }
+
+  Widget _buildHomePage() {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<MemeClusterBloc>(
+          create: (BuildContext context) => MemeClusterBloc(MemeClusterRepository(), widget._favoritesBloc)
+          ..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters))
+          ),
+          BlocProvider<ShareBloc>(create: (BuildContext context) => ShareBloc())
+        ],
+        child: MemeClustersPage()
+      );
+  }
+
+  Widget _buildFavoritesPage() {
+    return BlocProvider.value(
+      value: widget._favoritesBloc..add(FavoritesLoadEvent(FavoritesEventId.FavoritesUnitialized)),
+      child: FavoritesPage());
   }
 }
