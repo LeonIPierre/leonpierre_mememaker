@@ -20,8 +20,9 @@ class AppContainer extends StatefulWidget {
   final NavigationBloc navigationBloc;
   final AppBloc _appBloc;
   final FavoritesBloc _favoritesBloc;
+  final AdBloc _adBloc;
 
-  AppContainer(this.navigationBloc, this._appBloc, this._favoritesBloc);
+  AppContainer(this.navigationBloc, this._appBloc, this._favoritesBloc, this._adBloc);
 
   createState() => _AppContainerState();
 }
@@ -37,13 +38,11 @@ class _AppContainerState extends State<AppContainer> {
             stream: widget.navigationBloc.pages,
             initialData: widget.navigationBloc.navigation.value,
             builder: (BuildContext context, AsyncSnapshot<NavigationItemModel> snapshot) {
-              //return _buildPage(snapshot.data.item);
-              
               return Column(
                 children: <Widget>[
                    Expanded(child: _buildPage(snapshot.data.item), flex: 10),
                    Expanded(flex: 1,
-                     child: AdsWidget(AdBloc(widget._appBloc.configuration["appId"].toString(), configuration: widget._appBloc.configuration)),
+                     child: AdsWidget(widget._adBloc, widget._appBloc),
                     ),
                 ],
               );
@@ -73,14 +72,7 @@ class _AppContainerState extends State<AppContainer> {
             });
       }));
   }
-
-  @override
-  void dispose() {
-    widget._appBloc.close();
-    widget._favoritesBloc.close();
-    super.dispose();
-  }
-
+  
   Widget _buildPage(NavigationItem navigationItem) {
     switch (navigationItem) {
       case NavigationItem.HOME:

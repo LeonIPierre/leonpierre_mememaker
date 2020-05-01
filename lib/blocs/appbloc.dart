@@ -8,12 +8,15 @@ class AppBloc extends Bloc<AppIntializedEvent, AppState> {
 
   @override
   Stream<AppState> mapEventToState(AppIntializedEvent event) async* {
-    configuration.putIfAbsent('system:title', () => "Test");
+    configuration.putIfAbsent('system:title', () => "Mr.Meme");
     configuration.putIfAbsent("androidApiKey", () => "android_ZDRkYjk5ZjYtOGJjYy00ZGM1LWFmY2UtYTAwOWY1NzMzZTA2");
     configuration.putIfAbsent("iosApiKey", () => "ios_NWYwZjQyOTQtNWYxMi00ZjQyLTk2ODctODMzNzY4Y2M5YzM1");
     configuration.putIfAbsent("appId", () => "ca-app-pub-9962567440326517~4869787060");
 
+    //banner
     configuration.putIfAbsent("adUnitId", () => "ca-app-pub-3940256099942544/6300978111");
+
+    //intersitial
     //configuration.putIfAbsent("adUnitId", () => "ca-app-pub-3940256099942544/4411468910");
 
     yield AppInitializedState();
