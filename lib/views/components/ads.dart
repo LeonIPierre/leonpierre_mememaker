@@ -4,7 +4,6 @@ import 'package:dev_libraries/models/ad.dart';
 import 'package:dev_libraries/models/adconfiguration.dart';
 import 'package:dev_libraries/models/adservice.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leonpierre_mememaker/blocs/appbloc.dart';
 
 class AdsWidget extends StatefulWidget {
@@ -21,9 +20,8 @@ class _AdsWidgetState extends State<AdsWidget> {
   initState() {
     super.initState();
     
-    var adUnitId = widget.appBloc.configuration["adUnitId"];
-    //var adUnitId = "ca-app-pub-3940256099942544/1033173712";
-    widget.adBloc.add(AdEvent(AdEventId.StartAdStream, adConfiguration: AdConfiguration(AdType.Banner, adUnitId)));
+    var adUnitIds = Map.from(widget.appBloc.configuration)..removeWhere((k, v) => !k.contains("adUnitId"));
+    widget.adBloc.add(AdEvent(AdEventId.StartAdStream, adConfiguration: AdStreamConfiguration(AdType.Banner, adUnitIds)));
   }
 
   @override

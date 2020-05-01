@@ -17,12 +17,12 @@ import 'components/ads.dart';
 import 'screens/favorites.dart';
 
 class AppContainer extends StatefulWidget {
-  final NavigationBloc navigationBloc;
+  final NavigationBloc _navigationBloc;
   final AppBloc _appBloc;
   final FavoritesBloc _favoritesBloc;
   final AdBloc _adBloc;
 
-  AppContainer(this.navigationBloc, this._appBloc, this._favoritesBloc, this._adBloc);
+  AppContainer(this._navigationBloc, this._appBloc, this._favoritesBloc, this._adBloc);
 
   createState() => _AppContainerState();
 }
@@ -31,12 +31,12 @@ class _AppContainerState extends State<AppContainer> {
   @override
   Widget build(BuildContext context) {
    return Scaffold(
-      appBar: AppBar(title: Text(widget._appBloc.configuration["system:title"])),
+      appBar: AppBar(title: Text(widget._appBloc.configuration["title"])),
       body: BlocProvider.value(
         value: widget._favoritesBloc,
         child: StreamBuilder(
-            stream: widget.navigationBloc.pages,
-            initialData: widget.navigationBloc.navigation.value,
+            stream: widget._navigationBloc.pages,
+            initialData: widget._navigationBloc.navigation.value,
             builder: (BuildContext context, AsyncSnapshot<NavigationItemModel> snapshot) {
               return Column(
                 children: <Widget>[
@@ -63,14 +63,23 @@ class _AppContainerState extends State<AppContainer> {
                 title: Text('Favorites'),
               ),
             ],
-            currentIndex: widget.navigationBloc.navigation.value.index,
+            currentIndex: widget._navigationBloc.navigation.value.index,
             selectedItemColor: Theme.of(context).primaryColor,
             onTap: (index) {
-              widget.navigationBloc.toPage(index);
+              widget._navigationBloc.toPage(index);
               //notify ui of state change
               setState(() {});
             });
       }));
+  }
+
+  @override
+  void dispose() {
+    widget._navigationBloc.dispose();
+    widget._appBloc.close();
+    widget._favoritesBloc.close();
+    widget._adBloc.close();
+    super.dispose();
   }
   
   Widget _buildPage(NavigationItem navigationItem) {

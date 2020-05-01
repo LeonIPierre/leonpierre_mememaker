@@ -13,9 +13,9 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppBloc appBloc = BlocProvider.of<AppBloc>(context);
-    var adBloc = AdBloc(appBloc.configuration["appId"]);
+    var adBloc = AdBloc(appBloc.configuration["googleAdMob:appId"]);
     return MaterialApp(
-      title: appBloc.configuration["system:title"],
+      title: appBloc.configuration["title"],
       theme: ThemeData(
         backgroundColor: Colors.black,
         primarySwatch: Colors.greenAccent[300],
