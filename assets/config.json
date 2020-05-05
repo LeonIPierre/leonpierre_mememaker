@@ -8,8 +8,10 @@
     "googleAdMob": {
         "appId": "ca-app-pub-9962567440326517~4869787060",
         "bannerAdUnitId": "ca-app-pub-3940256099942544/6300978111",
-        "intersitialAdUnitId": "ca-app-pub-3940256099942544/6300978111",
-        "nativeAdUnitId": "",
-        "rewardAdUnitId": ""
+        "intersitialAdUnitId": "ca-app-pub-3940256099942544/1033173712",
+        "intersitialVideoAdUnitId": "ca-app-pub-3940256099942544/8691691433",
+        "nativeAdUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "nativeVideoAdUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "rewardAdUnitId": "ca-app-pub-3940256099942544/1044960115"
     }
 }

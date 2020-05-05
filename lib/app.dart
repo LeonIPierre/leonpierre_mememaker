@@ -12,15 +12,28 @@ import 'blocs/favorites/favoritesbloc.dart';
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    AppBloc appBloc = BlocProvider.of<AppBloc>(context);
-    var adBloc = AdBloc(appBloc.configuration["googleAdMob:appId"]);
-    return MaterialApp(
-      title: appBloc.configuration["title"],
-      theme: ThemeData(
-        backgroundColor: Colors.black,
-        primarySwatch: Colors.greenAccent[300],
-      ),
-      home: AppContainer(NavigationBloc()..toPage(0), appBloc, FavoritesBloc(FavoritesRepository()), adBloc)
-      );
+   
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<FavoritesBloc>(create: (BuildContext context) => FavoritesBloc(FavoritesRepository())),
+        BlocProvider<AdBloc>(create: (BuildContext context) {
+          var configuration = BlocProvider.of<AppBloc>(context).configuration;
+          return AdBloc(configuration["googleAdMob:appId"]);
+        })
+      ],
+      child: BlocBuilder<AppBloc, AppState>(
+      builder: (BuildContext context, AppState state) {
+        if(state is AppUnitializedState)
+          return CircularProgressIndicator();
+        else if(state is AppInitializedState)
+          return MaterialApp(
+            title: BlocProvider.of<AppBloc>(context).configuration["title"],
+            theme: ThemeData(backgroundColor: Colors.black,
+            primarySwatch: Colors.greenAccent[300]),
+            home: AppContainer(NavigationBloc()..toPage(0))
+            );
+
+        return Container();
+      }));
   }
 }

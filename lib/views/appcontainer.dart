@@ -18,37 +18,35 @@ import 'screens/favorites.dart';
 
 class AppContainer extends StatefulWidget {
   final NavigationBloc _navigationBloc;
-  final AppBloc _appBloc;
-  final FavoritesBloc _favoritesBloc;
-  final AdBloc _adBloc;
 
-  AppContainer(this._navigationBloc, this._appBloc, this._favoritesBloc, this._adBloc);
+  AppContainer(this._navigationBloc);
 
   createState() => _AppContainerState();
 }
 
 class _AppContainerState extends State<AppContainer> {
+  FavoritesBloc _favoritesBloc;
+  AdBloc _adBloc;
+
   @override
   Widget build(BuildContext context) {
+    _favoritesBloc = BlocProvider.of<FavoritesBloc>(context);
+    _adBloc = BlocProvider.of<AdBloc>(context);
+    var configuration = BlocProvider.of<AppBloc>(context).configuration;
+
    return Scaffold(
-      appBar: AppBar(title: Text(widget._appBloc.configuration["title"])),
-      body: BlocProvider.value(
-        value: widget._favoritesBloc,
-        child: StreamBuilder(
+      appBar: AppBar(title: Text(configuration["title"])),
+      body: StreamBuilder(
             stream: widget._navigationBloc.pages,
             initialData: widget._navigationBloc.navigation.value,
             builder: (BuildContext context, AsyncSnapshot<NavigationItemModel> snapshot) {
               return Column(
                 children: <Widget>[
                    Expanded(child: _buildPage(snapshot.data.item), flex: 10),
-                   Expanded(flex: 1,
-                     child: AdsWidget(widget._adBloc, widget._appBloc),
-                    ),
-                ],
-              );
-            }),
-      ),
-
+                   Expanded(child: AdsWidget(_adBloc, configuration), flex: 1)
+            ]);
+        }),
+      
       //TODO implement this animation https://pub.dev/packages/curved_navigation_bar
       bottomNavigationBar: StreamBuilder(builder:
           (BuildContext context, AsyncSnapshot<NavigationItem> snapshot) {
@@ -72,15 +70,6 @@ class _AppContainerState extends State<AppContainer> {
             });
       }));
   }
-
-  @override
-  void dispose() {
-    widget._navigationBloc.dispose();
-    widget._appBloc.close();
-    widget._favoritesBloc.close();
-    widget._adBloc.close();
-    super.dispose();
-  }
   
   Widget _buildPage(NavigationItem navigationItem) {
     switch (navigationItem) {
@@ -98,7 +87,7 @@ class _AppContainerState extends State<AppContainer> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<MemeClusterBloc>(
-          create: (BuildContext context) => MemeClusterBloc(MemeClusterRepository(), widget._favoritesBloc)
+          create: (BuildContext context) => MemeClusterBloc(MemeClusterRepository(), _favoritesBloc)
           ..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters))
           ),
           BlocProvider<ShareBloc>(create: (BuildContext context) => ShareBloc())
@@ -109,7 +98,7 @@ class _AppContainerState extends State<AppContainer> {
 
   Widget _buildFavoritesPage() {
     return BlocProvider.value(
-      value: widget._favoritesBloc..add(FavoritesLoadEvent(FavoritesEventId.FavoritesUnitialized)),
+      value: _favoritesBloc..add(FavoritesLoadEvent(FavoritesEventId.FavoritesUnitialized)),
       child: FavoritesPage());
   }
 }
