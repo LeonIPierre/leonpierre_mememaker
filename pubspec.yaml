@@ -27,8 +27,9 @@ dependencies:
   equatable: ^1.0.0
   flat: ^ 0.2.0
   dev_libraries:
-    path: C:/Users/dqa6235/projects/leonpierre_libraries/dev_libraries
-    
+    git:
+      url: git://github.com/LeonIPierre/flutter_dev_libraries
+
   #framework
   bloc: ^4.0.0
   flutter_bloc: ^4.0.0

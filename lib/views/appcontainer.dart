@@ -1,8 +1,8 @@
+import 'package:dev_libraries/bloc/app/app.dart';
 import 'package:dev_libraries/dev_libraries.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leonpierre_mememaker/blocs/appbloc.dart';
 import 'package:leonpierre_mememaker/blocs/components/share/sharebloc.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
