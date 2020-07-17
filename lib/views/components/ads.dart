@@ -3,6 +3,7 @@ import 'package:dev_libraries/dev_libraries.dart';
 import 'package:dev_libraries/models/ad.dart';
 import 'package:dev_libraries/models/adconfiguration.dart';
 import 'package:dev_libraries/models/adservice.dart';
+import 'package:dev_libraries/models/adsize.dart';
 import 'package:flutter/widgets.dart';
 
 class AdsWidget extends StatefulWidget {
@@ -19,8 +20,9 @@ class _AdsWidgetState extends State<AdsWidget> {
   initState() {
     super.initState();
     
-    Map<String, dynamic> adUnitIds = Map.from(widget.configuration)..removeWhere((k, v) => !k.contains("AdUnitId"));
-    widget.adBloc.add(AdEvent(AdEventId.StartAdStream, adConfiguration: AdStreamConfiguration(AdType.Interstitial, adUnitIds)));
+    AdSize adSize = AdSize(widget.configuration["ad:height"], widget.configuration["ad:width"]);
+    widget.adBloc.add(AdEvent(AdEventId.LoadAd, adConfiguration: AdConfiguration(AdType.Banner, adSize: adSize)));
+    widget.adBloc.add(AdEvent(AdEventId.StartAdStream, adConfiguration: AdConfiguration(AdType.Banner)));
   }
 
   @override
@@ -28,10 +30,11 @@ class _AdsWidgetState extends State<AdsWidget> {
     stream: widget.adBloc.ads,
     initialData: widget.adBloc.ads.value,
     builder: (BuildContext context, AsyncSnapshot<Ad> snapshot) {
-      if(snapshot.hasData && snapshot.data.adObject is Widget)
-        return snapshot.data.adObject as Widget;
+      if(!snapshot.hasData)
+        return Container();
 
-      return Container();
+      if(snapshot.data.adObject is Widget)
+        return snapshot.data.adObject as Widget;
     },
   );
 }

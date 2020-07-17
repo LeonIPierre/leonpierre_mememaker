@@ -18,7 +18,7 @@ class App extends StatelessWidget {
         BlocProvider<FavoritesBloc>(create: (BuildContext context) => FavoritesBloc(FavoritesRepository())),
         BlocProvider<AdBloc>(create: (BuildContext context) {
           var configuration = BlocProvider.of<AppBloc>(context).configuration;
-          return AdBloc(configuration["googleAdMob:appId"]);
+          return AdBloc(configuration["googleAdMob:appId"], configuration: configuration);
         })
       ],
       child: BlocBuilder<AppBloc, AppState>(

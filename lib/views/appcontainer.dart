@@ -33,6 +33,8 @@ class _AppContainerState extends State<AppContainer> {
     _favoritesBloc = BlocProvider.of<FavoritesBloc>(context);
     _adBloc = BlocProvider.of<AdBloc>(context);
     var configuration = BlocProvider.of<AppBloc>(context).configuration;
+    configuration["ad:width"] = MediaQuery.of(context).size.width.round();
+    configuration["ad:height"] = (MediaQuery.of(context).size.height * .1).round();
 
    return Scaffold(
       appBar: AppBar(title: Text(configuration["title"])),

@@ -1,3 +1,4 @@
+import 'package:dev_libraries/dev_libraries.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,8 +14,10 @@ import 'package:leonpierre_mememaker/views/components/share.dart';
 import 'package:queries/collections.dart';
 
 class MemeClustersWidget extends StatefulWidget {
-  final MemeClusterBloc clusterBloc;
-  MemeClustersWidget(this.clusterBloc, {Key key}) : super(key: key);
+  final MemeClusterBloc _clusterBloc;
+  final FavoritesBloc _favoritesBloc;
+  final AdBloc _adsBloc;
+  MemeClustersWidget(this._clusterBloc, this._favoritesBloc, this._adsBloc, {Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _MemeClusterWidgetState();
@@ -23,17 +26,15 @@ class MemeClustersWidget extends StatefulWidget {
 class _MemeClusterWidgetState extends State<MemeClustersWidget> {
   final double scale = .85;
   final double viewportFraction = .9;
-  FavoritesBloc _favoritesBloc;
 
   /*TODO when scrolling through memes you have to wait until the animation stops when scrolling
   before you can start scrolling up I believe its because it doesn't gain focus until the animation stops*/
   @override
-  Widget build(BuildContext context) { 
-    _favoritesBloc = BlocProvider.of<FavoritesBloc>(context);
+  Widget build(BuildContext context) {
     
     return StreamBuilder<IEnumerable<MemeCluster>>(
-      stream: widget.clusterBloc.clusters.stream,
-      initialData: widget.clusterBloc.clusters.stream.value,
+      stream: widget._clusterBloc.clusters.stream,
+      initialData: widget._clusterBloc.clusters.stream.value,
       builder: (context, snapshot) {
         return Swiper(
             itemBuilder: (BuildContext context, int index) {
@@ -64,6 +65,9 @@ class _MemeClusterWidgetState extends State<MemeClustersWidget> {
               );
             },
             itemCount: snapshot.hasData ? snapshot.data.count() : 0,
+            onIndexChanged: (int index) {
+              widget._adsBloc.add(AdDataPointEvent(5));
+            },
             scale: scale,
             viewportFraction: viewportFraction);
       });
@@ -73,6 +77,9 @@ class _MemeClusterWidgetState extends State<MemeClustersWidget> {
       itemBuilder: (BuildContext context, int index) =>
           _buildMemeContainer(context, memes.elementAt(index)),
       itemCount: memes.count(),
+      onIndexChanged: (int index) {
+        widget._adsBloc.add(AdDataPointEvent(5));
+      },
       scale: scale,
       scrollDirection: Axis.vertical,
       pagination: new SwiperPagination());
@@ -107,6 +114,6 @@ class _MemeClusterWidgetState extends State<MemeClustersWidget> {
 
   _toggleMemeLike(Meme meme) {
     var event = meme.isLiked ? FavoritesEventId.MemeRemoved : FavoritesEventId.MemeAdded;
-    _favoritesBloc.add(FavoriteStateChangedEvent(event, meme));
+    widget._favoritesBloc.add(FavoriteStateChangedEvent(event, meme));
   }
 }

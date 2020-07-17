@@ -5,7 +5,6 @@ import 'package:flat/flat.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 
-
 class AppBloc extends Bloc<AppIntializedEvent, AppState> {
   Map<String, dynamic> configuration = Map<String, dynamic>();
   @override
@@ -19,6 +18,8 @@ class AppBloc extends Bloc<AppIntializedEvent, AppState> {
         configuration = flatten(json.decode(content), delimiter: ":");
         BlocSupervisor.delegate = BlocManager(loggingService: 
           AppSpectorService(androidKey: configuration["appSpector:androidApiKey"]));
+
+        //check user type
         return AppInitializedState();
       });
   }
