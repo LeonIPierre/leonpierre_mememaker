@@ -1,4 +1,4 @@
-import 'package:dev_libraries/dev_libraries.dart';
+import 'package:dev_libraries/blocs/ads/ads.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,14 +31,12 @@ class _MemeClusterWidgetState extends State<MemeClustersWidget> {
   before you can start scrolling up I believe its because it doesn't gain focus until the animation stops*/
   @override
   Widget build(BuildContext context) {
-    
-    return StreamBuilder<IEnumerable<MemeCluster>>(
-      stream: widget._clusterBloc.clusters.stream,
-      initialData: widget._clusterBloc.clusters.stream.value,
-      builder: (context, snapshot) {
-        return Swiper(
+    return BlocBuilder<MemeClusterBloc, MemeClusterState>(
+      builder: (BuildContext context, MemeClusterState  state) {
+        if(state is MemeClusterIdealState)
+          return Swiper(
             itemBuilder: (BuildContext context, int index) {
-              var cluster = snapshot.data.elementAt(index);
+              var cluster = state.clusters.elementAt(index);
 
               return Column(
                 children: <Widget>[
@@ -64,12 +62,14 @@ class _MemeClusterWidgetState extends State<MemeClustersWidget> {
                 ],
               );
             },
-            itemCount: snapshot.hasData ? snapshot.data.count() : 0,
+            itemCount: state.clusters.count(),
             onIndexChanged: (int index) {
               widget._adsBloc.add(AdDataPointEvent(5));
             },
             scale: scale,
             viewportFraction: viewportFraction);
+
+        return Container();
       });
   }
 
