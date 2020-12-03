@@ -20,10 +20,9 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
 
   ReceivePort _port = ReceivePort();
   StreamSubscription<dynamic> _portSubscription;
-  //String _path;
   Meme _memeToDownload;
 
-  DownloadBloc() : super(DownloadIdealState()) {
+  DownloadBloc(this._downloadService, this._favoritesRepository) : super(DownloadIdealState()) {
     _initialize();
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/states.dart';
 import 'package:leonpierre_mememaker/models/contentbase.dart';
 import 'package:leonpierre_mememaker/views/components/content.dart';
 

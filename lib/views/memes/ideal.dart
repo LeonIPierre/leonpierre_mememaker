@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
-import 'package:leonpierre_mememaker/services/memesservice.dart';
+import 'package:leonpierre_mememaker/services/memeclustersservice.dart';
 
 class MemesViewComponent extends StatefulWidget {
-  final MemesService service;
+  final MemeClustersService service;
   MemesViewComponent({Key key, this.service}) : super(key: key);
 
   @override
