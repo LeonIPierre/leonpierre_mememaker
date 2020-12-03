@@ -1,4 +1,4 @@
-import 'package:dev_libraries/dev_libraries.dart';
+import 'package:dev_libraries/blocs/ads/ads.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
