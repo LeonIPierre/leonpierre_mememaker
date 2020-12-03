@@ -11,7 +11,7 @@ class ShareWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ShareBloc, ShareState>(
-        condition: (previousState, current) {
+        buildWhen: (previousState, current) {
           return previousState != current;
         },
         builder: (BuildContext context, ShareState state) {
