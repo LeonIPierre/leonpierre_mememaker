@@ -1,11 +1,12 @@
 import 'package:leonpierre_mememaker/repositories/entities/memecluster.dart';
+import 'package:leonpierre_mememaker/services/memeclustersservice.dart';
 import 'package:queries/collections.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class MemeClusterRepository {
-  //final String baseUrl = "https://leonipierre.ngrok.io/api/memes/clustered";
-  final String baseUrl = "http://108.175.11.170/api/memes/clustered";
+class MemeClusterRepository extends MemeClustersService {
+  final String baseUrl = "https://leonipierre.ngrok.io/api/memes/clustered";
+  //final String baseUrl = "http://108.175.11.170/api/memes/clustered";
   
   Future<IEnumerable<MemeClusterEntity>> byDateRangeAsync(
       DateTime start, DateTime end) async =>
@@ -28,7 +29,7 @@ class MemeClusterRepository {
   }
 
   Future<IEnumerable<MemeClusterEntity>> byNewestAsync() async {
-    var start = DateTime.now().subtract(Duration(days: 365)).toString();
+    var start = DateTime.now().subtract(Duration(days: 730)).toString();
     var end = DateTime.now().toString();
     final response = await _getResponse('$baseUrl/$start/$end');
 
