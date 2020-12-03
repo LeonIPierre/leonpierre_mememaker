@@ -6,9 +6,9 @@ import 'package:queries/collections.dart';
 
 class ShareBloc extends Bloc<ShareEvent, ShareState> {
   Meme _meme;
-  @override
-  ShareState get initialState => ShareHiddenState();
 
+  ShareBloc() : super(ShareHiddenState());
+  
   @override
   Stream<ShareState> mapEventToState(ShareEvent event) async* {
     switch (event.id) {
