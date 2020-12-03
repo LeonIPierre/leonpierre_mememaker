@@ -9,7 +9,7 @@ class MemeClusterEntity extends ContentBaseEntity {
   final String description;
   final IEnumerable<MemeEntity> memes;
 
-  MemeClusterEntity(id, {this.description, this.memes, String path, DateTime dateLiked}) : super(id, path: path, dateLiked: dateLiked);
+  MemeClusterEntity(String id, {this.description, this.memes, String path, DateTime dateLiked}) : super(id, path: path, dateLiked: dateLiked);
 
   factory MemeClusterEntity.fromJson(Map<String, dynamic> json) {
     var memesJson = json['memes'] as List;

@@ -4,8 +4,10 @@ import 'package:leonpierre_mememaker/repositories/entities/meme.dart';
 
 @immutable
 abstract class Meme extends ContentBase {
+  final String name;
+  final String description;
   final DateTime dateCreated;
-  final  DateTime datePosted;
+  final DateTime datePosted;
 
   //aggregate the states across different platforms
   final List<int> likes;
@@ -14,8 +16,8 @@ abstract class Meme extends ContentBase {
   final List<String> tags;
 
   Meme(id, Uri locationPath, this.dateCreated,
-      {this.datePosted, bool isLiked, author, this.likes, this.tags}) :
-      super(id, path: locationPath, isLiked: isLiked, author: author);
+      { this.name, this.description,  this.datePosted, bool isLiked, author, this.likes, this.tags }) :
+      super(id, path: locationPath, name: name, description: description, isLiked: isLiked, author: author);
 
   Object clone({Meme copyFrom});
 
@@ -25,13 +27,15 @@ abstract class Meme extends ContentBase {
     switch (entity.type) {
       case "ImageMeme":
         return ImageMeme.fromEntity(entity);
+      case "GifMeme":
+        return GifMeme.fromEntity(entity);
       default:
        throw new Exception("Invalid entity type ${entity.type}");
     }
   }
 }
 
-//need to be able to reate the state
+//need to be able to recreate the state
 class AudioMeme extends TextMeme {
   final int startPosition;
   final int endPosition;
@@ -56,14 +60,15 @@ class GifMeme extends Meme {
       : super(id, uri, dateCreated);
 
   @override
-  Object clone({Meme copyFrom}) {
-    return GifMeme(id, path, dateCreated);
-  }
+  Object clone({Meme copyFrom}) =>
+    GifMeme(id, path, dateCreated);
 
   @override
-  Meme cloneWithProps({bool isLiked}) {
-    return GifMeme(this.id, this.path, this.dateCreated, isLiked: isLiked);
-  }
+  Meme cloneWithProps({bool isLiked}) =>
+    GifMeme(this.id, this.path, this.dateCreated, isLiked: isLiked);
+  
+  static GifMeme fromEntity(MemeEntity entity) =>
+    GifMeme(entity.id, Uri.parse(entity.path), entity.dateCreated, isLiked: entity.dateLiked != null);
 }
 
 class ImageMeme extends Meme {
@@ -72,25 +77,20 @@ class ImageMeme extends Meme {
       : super(id, uri, dateCreated, isLiked: isLiked, author: author);
 
   @override
-  Object clone({Meme copyFrom}) {
-    return ImageMeme(id, path, dateCreated, datePosted: datePosted, text: text,
-      isLiked: copyFrom.isLiked, author: author);
-  }
+  Object clone({Meme copyFrom}) => ImageMeme(id, path, dateCreated,
+    datePosted: datePosted, text: text,
+    isLiked: copyFrom.isLiked, author: author);
 
   @override
-  Meme cloneWithProps({bool isLiked}) {
-    return ImageMeme(this.id, this.path, this.dateCreated, datePosted: this.datePosted,
+  Meme cloneWithProps({bool isLiked}) => ImageMeme(this.id, this.path, this.dateCreated, datePosted: this.datePosted,
     text: this.text, author: this.author, isLiked: isLiked);
-  }
 
-  static ImageMeme fromJson(Map<String, dynamic> json) {
-    return new ImageMeme(json['id'], Uri.parse(json['url']),
-        DateTime.parse(json['dateCreated']));
-  }
+  static ImageMeme fromJson(Map<String, dynamic> json) => ImageMeme(json['id'], Uri.parse(json['url']),
+    DateTime.parse(json['dateCreated']));
 
-  static ImageMeme fromEntity(MemeEntity entity) {
-    return ImageMeme(entity.id, Uri.parse(entity.path), entity.dateCreated, datePosted: entity.datePosted, author: entity.author, isLiked: entity.dateLiked != null);
-  }
+  static ImageMeme fromEntity(MemeEntity entity) => ImageMeme(entity.id, 
+    Uri.parse(entity.path), entity.dateCreated, datePosted: entity.datePosted,
+    author: entity.author, isLiked: entity.dateLiked != null);
 }
 
 class TextMeme extends Meme {
@@ -99,9 +99,7 @@ class TextMeme extends Meme {
       : super(id, uri, dateCreated, isLiked: isLiked);
 
   @override
-  Object clone({Meme copyFrom}) {
-    return TextMeme(copyFrom?.id ?? id, copyFrom?.path ?? path, copyFrom?.dateCreated ?? dateCreated, text);
-  }
+  Object clone({Meme copyFrom}) => TextMeme(copyFrom?.id ?? id, copyFrom?.path ?? path, copyFrom?.dateCreated ?? dateCreated, text);
 
   @override
   Meme cloneWithProps({bool isLiked}) {
