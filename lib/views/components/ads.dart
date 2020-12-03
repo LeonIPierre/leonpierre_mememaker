@@ -1,9 +1,5 @@
-import 'package:dev_libraries/bloc/adbloc.dart';
-import 'package:dev_libraries/dev_libraries.dart';
-import 'package:dev_libraries/models/ad.dart';
-import 'package:dev_libraries/models/adconfiguration.dart';
-import 'package:dev_libraries/models/adservice.dart';
-import 'package:dev_libraries/models/adsize.dart';
+import 'package:dev_libraries/blocs/ads/ads.dart';
+import 'package:dev_libraries/models/ads/ads.dart';
 import 'package:flutter/widgets.dart';
 
 class AdsWidget extends StatefulWidget {
