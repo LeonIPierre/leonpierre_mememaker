@@ -21,11 +21,8 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   final BehaviorSubject<Set<ContentBase>> _memeFavoritesSubject = BehaviorSubject<Set<ContentBase>>();
   final FavoritesRepository _favoritesRepository;
 
-  FavoritesBloc(this._favoritesRepository);
-
-  @override
-  FavoritesState get initialState => FavoritesEmptyState();
-
+  FavoritesBloc(this._favoritesRepository) : super(FavoritesEmptyState());
+  
   @override
   Stream<FavoritesState> mapEventToState(FavoritesEvent event) async* {
     switch (event.id) {

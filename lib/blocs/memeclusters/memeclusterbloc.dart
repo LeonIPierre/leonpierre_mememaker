@@ -7,24 +7,17 @@ import 'package:leonpierre_mememaker/blocs/favorites/states.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
-import 'package:leonpierre_mememaker/repositories/memeclusterrepository.dart';
-import 'package:queries/collections.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:leonpierre_mememaker/services/memeclustersservice.dart';
 
 class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
-  BehaviorSubject<IEnumerable<MemeCluster>> clusters = BehaviorSubject<IEnumerable<MemeCluster>>();
-  //BehaviorSubject<List<ContentBase>> get clusters => _favoritesSubject.stream;
 
-  final MemeClusterRepository _clusterRepository;
+  final MemeClustersService _clusterService;
   final FavoritesBloc _favoritesBloc;
   StreamSubscription _favoritesStream;
   
-  MemeClusterBloc(this._clusterRepository, this._favoritesBloc) {
+  MemeClusterBloc(this._clusterService, this._favoritesBloc) : super(MemeClusterLoadingState()) {
     _initialize();
   }
-
-  @override
-  MemeClusterState get initialState => MemeClusterLoadingState();
 
   @override
   Stream<MemeClusterState> mapEventToState(MemeClusterEvent event) async* {
@@ -35,12 +28,8 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
       case MemeClusterEventId.MemeClustersLoaded:
         var clusters = (event as MemeClustersLoadedEvent).clusters;
 
-        if(clusters.any()) {
-          this.clusters.sink.add(clusters);
-          yield MemeClusterIdealState(clusters: clusters); 
-        } else {
-          yield MemeClusterEmptyState();
-        }
+        yield clusters.any() 
+          ? MemeClusterIdealState(clusters: clusters) : MemeClusterEmptyState();
         break;
       // case MemeClusterEventId.NewMemeAddedToCluster:
       //   //TODO when a new meme is added in the ideal state that cluster needs to be updated (if any)
@@ -71,7 +60,6 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
 
   @override
   Future<void> close() {
-    clusters?.close();
     _favoritesStream?.cancel();
     return super.close();
   }
@@ -92,12 +80,11 @@ class MemeClusterBloc extends Bloc<MemeClusterEvent, MemeClusterState> {
           
         add(MemeClustersLoadedEvent(updatedClusters));
       }
-
     });
   }
 
   Stream<MemeClusterState> _mapMemeClusterLoadedState() async* {
-    yield await _clusterRepository.byNewestAsync().then((entities) {
+    yield await _clusterService.byNewestAsync().then((entities) {
       var clusters = entities.select((x) => MemeCluster.fromEntity(x));
       _favoritesBloc.add(FavoritesByContentLoadEvent(FavoritesEventId.LoadFavoritedMemeClusters, clusters));
       return state;
