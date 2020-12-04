@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leonpierre_mememaker/blocs/download/download_bloc.dart';
+import 'package:leonpierre_mememaker/views/components/content.dart';
 import 'package:path_provider/path_provider.dart';
 import'dart:io' show Platform;
 
 class DownloadPage extends StatefulWidget {
-  final DownloadBloc _downloadBloc;
-
-  const DownloadPage(this._downloadBloc, {Key key}) : super(key: key);
+  const DownloadPage({Key key}) : super(key: key);
 
   @override
   _DownloadPageState createState() => _DownloadPageState();
@@ -17,6 +16,7 @@ class DownloadPage extends StatefulWidget {
 class _DownloadPageState extends State<DownloadPage> {
   @override
   Widget build(BuildContext context) {
+    DownloadBloc _downloadBloc = BlocProvider.of(context);
     //textbox
 
     //top 10 recent downloads
@@ -45,13 +45,37 @@ class _DownloadPageState extends State<DownloadPage> {
               keyboardType: TextInputType.url,
               validator: (value) => state.isValid ? null : 'errorText',
               onChanged: (value) =>
-                  widget._downloadBloc.add(DownloadUrlChangedEvent(value)),
+                  _downloadBloc.add(DownloadUrlChangedEvent(value)),
             ),
 
             IconButton(icon: Icon(Icons.download_rounded), 
               onPressed: () async => await _getDownloadPath()
-                .then((path) => widget._downloadBloc.add(DownloadRequestEvent('', path))))
+                .then((path) => _downloadBloc.add(DownloadRequestEvent(state.url, path)))),
           ],
+        );
+      else if (state is DownloadCompletedState)
+        return Column(
+          children: [
+            TextFormField(
+              decoration: InputDecoration(
+                  contentPadding: EdgeInsets.all(4.0),
+                  border: InputBorder.none,
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  //errorText: errorText ?? errorText,
+                  hintText: 'url'),
+              keyboardType: TextInputType.url,
+              validator: (value) => state.isValid ? null : 'errorText',
+              onChanged: (value) =>
+                  _downloadBloc.add(DownloadUrlChangedEvent(value)),
+            ),
+
+            IconButton(icon: Icon(Icons.download_rounded), 
+              onPressed: () async => await _getDownloadPath()
+                .then((path) => _downloadBloc.add(DownloadRequestEvent(state.url, path)))),
+
+            ContentWidget(state.meme)
+          ]
         );
     });
   }

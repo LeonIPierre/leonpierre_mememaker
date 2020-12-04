@@ -5,8 +5,8 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
-import 'package:leonpierre_mememaker/repositories/favoritesrepository.dart';
 import 'package:leonpierre_mememaker/services/memedownloadservice.dart';
 import 'package:queries/collections.dart';
 import 'package:validators/validators.dart';
@@ -16,13 +16,14 @@ part 'download_state.dart';
 
 class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
   MemeDownloadService _downloadService;
-  FavoritesRepository _favoritesRepository;
+  //FavoritesRepository _favoritesRepository;
+  FavoritesBloc _favoritesBloc;
 
   ReceivePort _port = ReceivePort();
   StreamSubscription<dynamic> _portSubscription;
   Meme _memeToDownload;
 
-  DownloadBloc(this._downloadService, this._favoritesRepository) : super(DownloadIdealState()) {
+  DownloadBloc(this._downloadService, this._favoritesBloc) : super(DownloadIdealState()) {
     _initialize();
   }
 
@@ -36,18 +37,17 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
       case DownloadEventIds.DownloadRequested:
         var downloadEvent = event as DownloadRequestEvent;
 
-        yield await _downloadService.getMemeByUrlAysnc(downloadEvent.url)
+        yield await _downloadService.getMemeByUrlAsync(downloadEvent.url)
           .then((meme) async {
-            _memeToDownload = meme;
-            //_path = "${downloadEvent.downloadDirectory}/${meme.name}";
-            
+            _memeToDownload = Meme.mapFromEntity(meme);
             return downloadEvent;
           })
           .then((event) async => await FlutterDownloader.enqueue(
-            url: event.url,
+            url: _memeToDownload.path.toString(),
             savedDir: event.downloadDirectory
           ))
-          .then((_) => DownloadIdealState(url: downloadEvent.url));
+          .then((_) => DownloadIdealState(url: downloadEvent.url))
+          .catchError((error) => DownloadErrorState());
         break;
       case DownloadEventIds.DownloadUrlChanged:
         var downloadEvent = event as DownloadUrlChangedEvent;
@@ -89,7 +89,9 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
     }
   }
 
-  Future _initialize() async {
+  Future<void> _initialize() async {
+    if(_portSubscription != null) return;
+
     _portSubscription = await FlutterDownloader.initialize(debug: true
     ).then((_) {
       if(!IsolateNameServer.registerPortWithName(_port.sendPort, 'downloader_send_port')) {
@@ -108,8 +110,9 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
             add(DownloadErrorEvent(2));
           else if(status == DownloadTaskStatus.complete)
           {
-            await _favoritesRepository.favoriteMeme(_memeToDownload, DateTime.now())
-              .then((favorited) => favorited ? add(DownloadMemeEvent(_memeToDownload)) : add(DownloadErrorEvent(3)));
+            _favoritesBloc.add(FavoriteStateChangedEvent(FavoritesEventId.MemeAdded, _memeToDownload));
+            //await _favoritesRepository.favoriteMeme(_memeToDownload, DateTime.now())
+            //  .then((favorited) => favorited ? add(DownloadMemeEvent(_memeToDownload)) : add(DownloadErrorEvent(3)));
           }
         });
     });

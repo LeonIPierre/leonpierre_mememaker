@@ -6,12 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leonpierre_mememaker/blocs/components/share/sharebloc.dart';
-import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
+import 'package:leonpierre_mememaker/blocs/download/download_bloc.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/memeclusterbloc.dart';
 import 'package:leonpierre_mememaker/repositories/memeclusterrepository.dart';
-import 'package:leonpierre_mememaker/services/MockApiService.dart';
+import 'package:leonpierre_mememaker/repositories/memedownloadrepository.dart';
+import 'package:leonpierre_mememaker/views/screens/download.dart';
 import 'package:leonpierre_mememaker/views/screens/memeclusters.dart';
 
 import 'components/ads.dart';
@@ -37,7 +38,7 @@ class _AppContainerState extends State<AppContainer> {
     return BlocBuilder<ConfigurationBloc, ConfigurationState>(
         builder: (BuildContext context, ConfigurationState state) {
       if (state is ConfigurationUnitializedState)
-        return CircularProgressIndicator();
+        return Center(child: CircularProgressIndicator());
       else if (state is ConfigurationErrorState)
         return Center(child: Text(state.message));
       else if (state is ConfigurationInitializedState)
@@ -64,6 +65,10 @@ class _AppContainerState extends State<AppContainer> {
                             label: 'Home/What' 's hot'
                           ),
                           BottomNavigationBarItem(
+                            icon: Icon(Icons.download_rounded),
+                            label: 'Download'
+                          ),
+                          BottomNavigationBarItem(
                             icon: Icon(Icons.save),
                             label: 'Favorites'
                           ),
@@ -78,42 +83,6 @@ class _AppContainerState extends State<AppContainer> {
                   }));
             });
 
-      //   return Scaffold(
-      //     appBar: AppBar(title: Text(state.configuration["title"])),
-      //     body: BlocBuilder<NavigationCubit, NavigationItemModel>(
-      //       cubit: widget._navigationBloc,
-      //       builder: (BuildContext context, NavigationItemModel pageModel) {
-      //         return Column(
-      //           children: <Widget>[
-      //              Expanded(child: _buildPage(pageModel.item), flex: 10),
-      //              Expanded(child: AdsWidget(_adBloc, state.configuration), flex: 1)
-      //       ]);
-      //       }
-      // ),
-
-      // //TODO implement this animation https://pub.dev/packages/curved_navigation_bar
-      // bottomNavigationBar: StreamBuilder(builder:
-      //     (BuildContext context, AsyncSnapshot<NavigationItem> snapshot) {
-      //   return BottomNavigationBar(
-      //       items: const <BottomNavigationBarItem>[
-      //         BottomNavigationBarItem(
-      //           icon: Icon(Icons.flare),
-      //           title: Text('Home/What' 's hot'),
-      //         ),
-      //         BottomNavigationBarItem(
-      //           icon: Icon(Icons.save),
-      //           title: Text('Favorites'),
-      //         ),
-      //       ],
-      //       currentIndex: widget._navigationBloc.navigation.value.index,
-      //       selectedItemColor: Theme.of(context).primaryColor,
-      //       onTap: (index) {
-      //         widget._navigationBloc.toPage(index);
-      //         //notify ui of state change
-      //         setState(() {});
-      //       });
-      // }));
-
       return Container();
     });
   }
@@ -123,8 +92,9 @@ class _AppContainerState extends State<AppContainer> {
       case 0:
         return _buildHomePage();
       case 1:
-        return _buildFavoritesPage();
+        return _buildDownloadPage();
       case 2:
+        return _buildFavoritesPage();
       default:
         return null;
     }
@@ -134,10 +104,15 @@ class _AppContainerState extends State<AppContainer> {
     return MultiBlocProvider(providers: [
       BlocProvider<MemeClusterBloc>(
           create: (BuildContext context) =>
-              MemeClusterBloc(MockApiService(), _favoritesBloc)
+              MemeClusterBloc(MemeClusterRepository(), _favoritesBloc)
                 ..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters))),
       BlocProvider<ShareBloc>(create: (BuildContext context) => ShareBloc())
     ], child: MemeClustersPage());
+  }
+
+  Widget _buildDownloadPage() {
+    return BlocProvider(create: (BuildContext context) => DownloadBloc(MemeDownloadRepository(), _favoritesBloc),
+    child: DownloadPage());
   }
 
   Widget _buildFavoritesPage() {

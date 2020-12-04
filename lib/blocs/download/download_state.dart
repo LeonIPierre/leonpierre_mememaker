@@ -22,10 +22,11 @@ class DownloadIdealState extends DownloadState {
   List<Object> get props => [url, isValid, recentDownloads];
 }
 
-class DownloadCompletedState extends DownloadState {
+class DownloadCompletedState extends DownloadIdealState {
   final Meme meme;
 
-  DownloadCompletedState(this.meme);
+  DownloadCompletedState(this.meme, { String url = '', bool isValid = false, IEnumerable<Meme> recentDownloads})
+    : super(url: url, isValid: isValid, recentDownloads: recentDownloads);
 
   @override
   List<Object> get props => [meme];
