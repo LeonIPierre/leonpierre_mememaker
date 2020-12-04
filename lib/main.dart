@@ -6,18 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leonpierre_mememaker/app.dart';
 import 'package:leonpierre_mememaker/repositories/staticassetrepository.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // runApp(BlocProvider<ConfigurationBloc>(
-  //   create: (BuildContext context) => ConfigurationBloc()..add(ConfigurationIntializedEvent()),
-  //   child: App(),
-  // ));
-  
   var pages = [
     NavigationItemModel(0, null),
-    NavigationItemModel(1, null)
+    NavigationItemModel(1, null),
+    NavigationItemModel(2, null)
   ];
   runApp(MultiBlocProvider(providers: [
     BlocProvider<ConfigurationBloc>(

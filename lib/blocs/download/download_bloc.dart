@@ -16,7 +16,6 @@ part 'download_state.dart';
 
 class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
   MemeDownloadService _downloadService;
-  //FavoritesRepository _favoritesRepository;
   FavoritesBloc _favoritesBloc;
 
   ReceivePort _port = ReceivePort();
