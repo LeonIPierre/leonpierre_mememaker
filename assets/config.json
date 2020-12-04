@@ -1,5 +1,10 @@
 {
     "title": "Mr.Meme",
+
+    "mrMeme": {
+        "apiBaseUrl": "https://mrmeme.io/api"
+    },
+
     "appSpector": {
         "androidApiKey": "android_ZDRkYjk5ZjYtOGJjYy00ZGM1LWFmY2UtYTAwOWY1NzMzZTA2",
         "iosApiKey": "ios_NWYwZjQyOTQtNWYxMi00ZjQyLTk2ODctODMzNzY4Y2M5YzM1"

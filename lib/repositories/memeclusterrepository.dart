@@ -5,12 +5,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class MemeClusterRepository extends MemeClustersService {
-  final String baseUrl = "https://leonipierre.ngrok.io/api/memes/clustered";
-  //final String baseUrl = "http://108.175.11.170/api/memes/clustered";
+  final String _baseUrl;
+
+  MemeClusterRepository(this._baseUrl);
+
   
   Future<IEnumerable<MemeClusterEntity>> byDateRangeAsync(
       DateTime start, DateTime end) async =>
-      await _getResponse('$baseUrl/${start.toString()}/${end.toString()}').then((response) {
+      await _getResponse('$_baseUrl/memes/clustered/${start.toString()}/${end.toString()}').then((response) {
           if (response.statusCode != 200)
             throw Exception('Failed to clusters for dates between $start and $end');
 
@@ -20,7 +22,7 @@ class MemeClusterRepository extends MemeClustersService {
         });
         
   Future<MemeClusterEntity> byIdAsync(String clusterId) async { 
-    final response = await _getResponse('$baseUrl/$clusterId');
+    final response = await _getResponse('$_baseUrl/memes/clustered/$clusterId');
 
     if (response.statusCode != 200)
       throw Exception('Failed to load meme cluster $clusterId');
@@ -28,10 +30,10 @@ class MemeClusterRepository extends MemeClustersService {
     return MemeClusterEntity.fromJson(json.decode(response.body));
   }
 
-  Future<IEnumerable<MemeClusterEntity>> byNewestAsync() async {
-    var start = DateTime.now().subtract(Duration(days: 730)).toString();
+  Future<IEnumerable<MemeClusterEntity>> byNewestAsync({int days = 730}) async {
+    var start = DateTime.now().subtract(Duration(days: days)).toString();
     var end = DateTime.now().toString();
-    final response = await _getResponse('$baseUrl/$start/$end');
+    final response = await _getResponse('$_baseUrl/memes/clustered/$start/$end');
 
     if (response.statusCode != 200)
       throw Exception('Failed to load newest clusters from $start to $end');

@@ -51,7 +51,7 @@ class _AppContainerState extends State<AppContainer> {
               return Scaffold(
                   appBar: AppBar(title: Text(state.configuration["title"])),
                   body: Column(children: <Widget>[
-                    Expanded(child: _buildPage(pageModel), flex: 10),
+                    Expanded(child: _buildPage(pageModel, state.configuration), flex: 10),
                     Expanded(child: AdsWidget(_adBloc, state.configuration), flex: 1)
                   ]),
 
@@ -87,12 +87,12 @@ class _AppContainerState extends State<AppContainer> {
     });
   }
 
-  Widget _buildPage(NavigationItemModel navigationItem) {
+  Widget _buildPage(NavigationItemModel navigationItem, Map<String, dynamic> configuration) {
     switch (navigationItem.index) {
       case 0:
-        return _buildHomePage();
+        return _buildHomePage(configuration);
       case 1:
-        return _buildDownloadPage();
+        return _buildDownloadPage(configuration);
       case 2:
         return _buildFavoritesPage();
       default:
@@ -100,18 +100,19 @@ class _AppContainerState extends State<AppContainer> {
     }
   }
 
-  Widget _buildHomePage() {
+  Widget _buildHomePage(Map<String, dynamic> configuration) {
     return MultiBlocProvider(providers: [
       BlocProvider<MemeClusterBloc>(
           create: (BuildContext context) =>
-              MemeClusterBloc(MemeClusterRepository(), _favoritesBloc)
+              MemeClusterBloc(MemeClusterRepository(configuration["mrmeme:baseApiUrl"]), _favoritesBloc)
                 ..add(MemeClusterEvent(MemeClusterEventId.LoadMemeClusters))),
       BlocProvider<ShareBloc>(create: (BuildContext context) => ShareBloc())
     ], child: MemeClustersPage());
   }
 
-  Widget _buildDownloadPage() {
-    return BlocProvider(create: (BuildContext context) => DownloadBloc(MemeDownloadRepository(), _favoritesBloc),
+  Widget _buildDownloadPage(Map<String, dynamic> configuration) {
+    return BlocProvider(create: (BuildContext context) => DownloadBloc(
+      MemeDownloadRepository(configuration["mrmeme:baseApiUrl"]), _favoritesBloc),
     child: DownloadPage());
   }
 
