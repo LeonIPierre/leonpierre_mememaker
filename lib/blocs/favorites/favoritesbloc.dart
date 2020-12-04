@@ -1,14 +1,16 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
-import 'package:leonpierre_mememaker/blocs/favorites/states.dart';
+import 'package:equatable/equatable.dart';
 import 'package:leonpierre_mememaker/models/contentbase.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';
 import 'package:leonpierre_mememaker/repositories/favoritesrepository.dart';
 import 'package:queries/collections.dart';
 import 'package:rxdart/rxdart.dart';
+
+part 'events.dart';
+part 'states.dart';
 
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   BehaviorSubject<Set<ContentBase>> get favorites => Stream.fromFuture(_clusterFavoritesSubject.addStream(_memeFavoritesSubject.stream));

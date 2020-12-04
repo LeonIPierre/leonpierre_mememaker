@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-import 'package:leonpierre_mememaker/models/contentbase.dart';
-import 'package:queries/collections.dart';
+part of 'favoritesbloc.dart';
 
 enum FavoritesEventId {
   //empty

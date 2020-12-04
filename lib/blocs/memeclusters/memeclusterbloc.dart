@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:leonpierre_mememaker/blocs/favorites/events.dart';
 import 'package:leonpierre_mememaker/blocs/favorites/favoritesbloc.dart';
-import 'package:leonpierre_mememaker/blocs/favorites/states.dart';
 import 'package:leonpierre_mememaker/blocs/memeclusters/bloc.dart';
 import 'package:leonpierre_mememaker/models/memecluster.dart';
 import 'package:leonpierre_mememaker/models/mememodel.dart';

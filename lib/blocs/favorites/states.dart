@@ -1,5 +1,4 @@
-import 'package:leonpierre_mememaker/models/contentbase.dart';
-import 'package:queries/collections.dart';
+part of 'favoritesbloc.dart';
 
 abstract class FavoritesState {
   const FavoritesState();
