@@ -13,7 +13,11 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="leonpierre_mememaker"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:networkSecurityConfig="@xml/network_security_config">
+        <meta-data android:name="io.flutter.network-policy"
+        android:resource="@xml/network_security_config"/>
+
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713" />
