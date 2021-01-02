@@ -92,19 +92,20 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
       return;
     }
 
-    var entities = await _favoritesRepository.getMemesByHistory(start, end);
-
-    if (entities.any()) {
-      var memes = entities.select((x) => Meme.mapFromEntity(x));
-
-      _memeFavorites.addAll(memes.asIterable());
-      _memeFavoritesSubject.add(_memeFavorites);
-
-      yield FavoritedContentLoadedByDateRangeState<Meme>(memes, start, end);
-    } else {
-      var memes = (state as FavoritedContentLoadedState).items;
-      yield FavoritedContentLoadedState<Meme>(memes, hasReachedMax: true);
-    }
+    yield await _favoritesRepository.getMemesByHistory(start, end)
+      .then((entities) {   
+        if (entities.any()) {
+          var memes = entities.select((x) => Meme.mapFromEntity(x));
+          
+          _memeFavorites.addAll(memes.asIterable());
+          _memeFavoritesSubject.add(_memeFavorites);
+          
+          return FavoritedContentLoadedByDateRangeState<Meme>(memes, start, end);
+        } else {
+          var memes = (state as FavoritedContentLoadedState).items;
+          return FavoritedContentLoadedState<Meme>(memes, hasReachedMax: true);
+        }
+    });
   }
 
   Stream<FavoritesState> _mapFavoritesRequest(FavoritesByContentLoadEvent<MemeCluster> event) async* {
@@ -143,31 +144,37 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
 
   Stream<FavoritesState> _mapMemeClusterAddedState(FavoriteStateChangedEvent<MemeCluster> event) async* {
     var cluster = event.item;
-    var success = await _favoritesRepository.favoriteCluster(cluster, DateTime.now());
-    var clone = cluster.clone(isLiked: true);
 
-    _clusterFavorites.removeWhere((x) => x.id == clone.id);
+    yield await _favoritesRepository.favoriteCluster(cluster, DateTime.now())
+      .then((success) {
+        var clone = cluster.clone(isLiked: true);
+        
+        _clusterFavorites.removeWhere((x) => x.id == clone.id);
 
-    if (success && _clusterFavorites.add(clone)) {
-      //want to do a replace or add
-      _clusterFavoritesSubject.add(_clusterFavorites);
-      yield FavoritedContentChangedState(clone);
-    } else {
-      yield FavoritesErrorState();
-    }
+        if (success && _clusterFavorites.add(clone)) {
+          //want to do a replace or add
+          _clusterFavoritesSubject.add(_clusterFavorites);
+          return FavoritedContentChangedState(clone);
+        } else {
+          return FavoritesErrorState();
+        }
+    });
   }
 
   Stream<FavoritesState> _mapMemeClusterRemovedState(FavoriteStateChangedEvent<MemeCluster> event) async* {
     var cluster = event.item;
-    var success = await _favoritesRepository.removeClusterFavorite(cluster, DateTime.now());
-    var clone = cluster.clone(isLiked: false);
 
-    if (success && _clusterFavorites.remove(cluster)) {
-      _clusterFavoritesSubject.add(_clusterFavorites);
-      yield FavoritedContentChangedState(clone);
-    } else {
-      yield FavoritesErrorState();
-    }
+    yield await _favoritesRepository.removeClusterFavorite(cluster, DateTime.now())
+      .then((success) {
+        var clone = cluster.clone(isLiked: false);
+
+        if (success && _clusterFavorites.remove(cluster)) {
+          _clusterFavoritesSubject.add(_clusterFavorites);
+          return FavoritedContentChangedState(clone);
+        } else {
+          return FavoritesErrorState();
+        }
+      });
   }
 
   Stream<FavoritesState> _mapMemeAddedState(FavoriteStateChangedEvent<Meme> event) async* {
