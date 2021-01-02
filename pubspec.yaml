@@ -1,5 +1,5 @@
 name: leonpierre_mememaker
-description: A new Flutter project.
+description: All the top shelf memes
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -14,7 +14,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: ">=2.6.0 <3.0.0"
   
 dependencies:
   flutter:
@@ -28,8 +28,11 @@ dependencies:
   validators: ^2.0.1
   path_provider: ^1.6.24
   dev_libraries:
+    #publish_to: none
     path: C:\Users\Leon\Documents\projects\flutter_dev_libraries
+    
     #git:
+    #  publish_to: none
     #  url: git://github.com/LeonIPierre/flutter_dev_libraries
 
   #framework
@@ -47,7 +50,6 @@ dependencies:
    
 dev_dependencies:
   test: ^1.3.0
-  #bloc_test: ^6.1.0
   flutter_test:
     sdk: flutter
   faker: ^1.1.1
