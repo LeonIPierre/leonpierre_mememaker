@@ -36,12 +36,15 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
       case DownloadEventIds.DownloadRequested:
         var downloadEvent = event as DownloadRequestEvent;
 
+        yield DownloadLoadingState();
+
         yield await _downloadService.getMemeByUrlAsync(downloadEvent.url)
           .then((meme) async {
             _memeToDownload = Meme.mapFromEntity(meme);
             return downloadEvent;
           })
           .then((event) async => await FlutterDownloader.enqueue(
+            openFileFromNotification: false,
             url: _memeToDownload.path.toString(),
             savedDir: event.downloadDirectory
           ))
@@ -51,13 +54,14 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
       case DownloadEventIds.DownloadUrlChanged:
         var downloadEvent = event as DownloadUrlChangedEvent;
         var currentState = state;
+        var isValid = isURL(downloadEvent.url);
 
         if(currentState is DownloadIdealState) {
-          yield currentState.copyWith(url: downloadEvent.url, isValid: isURL(downloadEvent.url));
+          yield currentState.copyWith(url: downloadEvent.url, isValid: isValid);
           return;
         }
         
-        yield DownloadIdealState(url: downloadEvent.url, isValid: isURL(downloadEvent.url));
+        yield DownloadIdealState(url: downloadEvent.url, isValid: isValid);
         break;
       case DownloadEventIds.DownloadProgressUpdate:
         yield DownloadLoadingState(progress: (event as DownloadProgressEvent).progress);
@@ -84,42 +88,37 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
         yield DownloadErrorState(message: message);
         break;
       case DownloadEventIds.DownloadCompleted:
-        yield DownloadCompletedState((event as DownloadMemeEvent).meme);
+        var meme = (event as DownloadMemeEvent).meme;
+        _favoritesBloc.add(FavoriteStateChangedEvent(FavoritesEventId.MemeAdded, meme));
+        yield DownloadCompletedState(meme);
     }
   }
 
   Future<void> _initialize() async {
     if(_portSubscription != null) return;
 
-    _portSubscription = await FlutterDownloader.initialize(debug: true
-    ).then((_) {
-      if(!IsolateNameServer.registerPortWithName(_port.sendPort, 'downloader_send_port')) {
-        add(DownloadErrorEvent(1));
-        return null;
-      }
-      
-      return _port.listen((dynamic data) async {
-          //String id = data[0];
-          DownloadTaskStatus status = data[1];
-          int progress = data[2];
+    if(!IsolateNameServer.registerPortWithName(_port.sendPort, 'mrmeme_port')) {
+      add(DownloadErrorEvent(1));
+      return;
+    }
 
-          if (status == DownloadTaskStatus.running)
-            add(DownloadProgressEvent(progress));
-          else if (status == DownloadTaskStatus.failed)
-            add(DownloadErrorEvent(2));
-          else if(status == DownloadTaskStatus.complete)
-          {
-            _favoritesBloc.add(FavoriteStateChangedEvent(FavoritesEventId.MemeAdded, _memeToDownload));
-            //await _favoritesRepository.favoriteMeme(_memeToDownload, DateTime.now())
-            //  .then((favorited) => favorited ? add(DownloadMemeEvent(_memeToDownload)) : add(DownloadErrorEvent(3)));
-          }
-        });
+    _portSubscription = _port.listen((dynamic data) async {
+      //String id = data[0];
+      DownloadTaskStatus status = data[1];
+      int progress = data[2];
+      
+      if (status == DownloadTaskStatus.running)
+        add(DownloadProgressEvent(progress));
+      else if (status == DownloadTaskStatus.failed)
+        add(DownloadErrorEvent(2));
+      else if(status == DownloadTaskStatus.complete)
+        add(DownloadMemeEvent(_memeToDownload));
     });
   }
 
   @override
   Future<void> close() {
-    IsolateNameServer.removePortNameMapping('downloader_send_port');
+    IsolateNameServer.removePortNameMapping('mrmeme_port');
     _portSubscription?.cancel();
     return super.close();
   }
