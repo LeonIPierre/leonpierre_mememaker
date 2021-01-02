@@ -8,7 +8,6 @@ class MemeClusterRepository extends MemeClustersService {
   final String _baseUrl;
 
   MemeClusterRepository(this._baseUrl);
-
   
   Future<IEnumerable<MemeClusterEntity>> byDateRangeAsync(
       DateTime start, DateTime end) async =>
@@ -45,5 +44,5 @@ class MemeClusterRepository extends MemeClustersService {
   }
 
   Future<http.Response> _getResponse(String url) async =>
-      await http.get(url).timeout(Duration(minutes: 10));
+      await http.get(url).timeout(Duration(seconds: 30));
 }
