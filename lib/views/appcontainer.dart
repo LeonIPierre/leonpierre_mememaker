@@ -1,4 +1,4 @@
-import 'package:dev_libraries/blocs/ads/ads.dart';
+import 'package:dev_libraries/blocs/ads/adbloc.dart';
 import 'package:dev_libraries/blocs/configuration/configuration.dart';
 import 'package:dev_libraries/blocs/navigation_cubit.dart';
 import 'package:dev_libraries/models/navigationitem.dart';

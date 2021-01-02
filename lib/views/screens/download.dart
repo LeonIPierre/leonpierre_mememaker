@@ -77,6 +77,8 @@ class _DownloadPageState extends State<DownloadPage> {
             ContentWidget(state.meme)
           ]
         );
+
+        return null;
     });
   }
 

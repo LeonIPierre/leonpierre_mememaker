@@ -1,4 +1,4 @@
-import 'package:dev_libraries/blocs/ads/ads.dart';
+import 'package:dev_libraries/blocs/ads/adbloc.dart';
 import 'package:dev_libraries/models/ads/ads.dart';
 import 'package:flutter/widgets.dart';
 
@@ -31,6 +31,8 @@ class _AdsWidgetState extends State<AdsWidget> {
 
       if(snapshot.data.adObject is Widget)
         return snapshot.data.adObject as Widget;
+
+      return null;
     },
   );
 }

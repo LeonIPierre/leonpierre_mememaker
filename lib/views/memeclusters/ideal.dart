@@ -1,4 +1,4 @@
-import 'package:dev_libraries/blocs/ads/ads.dart';
+import 'package:dev_libraries/blocs/ads/adbloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
