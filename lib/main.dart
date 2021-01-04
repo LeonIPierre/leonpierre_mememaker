@@ -15,7 +15,6 @@ void main() async {
 
   //TODO move to happening after the configuration if possible
   //await FlutterDownloader.initialize(debug: true);
-  //await Firebase.initializeApp();
 
   var pages = [
     NavigationItemModel(0, null),
@@ -29,7 +28,7 @@ void main() async {
             ConfigurationBloc(repositories: [StaticAssetRepository()])..add(ConfigurationIntializedEvent())),
     BlocProvider<AuthenticationBloc>(
       create: (BuildContext context) => AuthenticationBloc(
-        authenticationService: FirebaseAuthenticationRepository(),
+        authenticationService: FirebaseAuthenticationRepository()..initialize(),
         userService: UserService("https://mrmeme.io/api/users"))),
     BlocProvider<NavigationCubit>(
         create: (BuildContext context) => NavigationCubit(pages)..toPage(0)),
