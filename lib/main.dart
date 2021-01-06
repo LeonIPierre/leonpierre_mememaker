@@ -14,7 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   //TODO move to happening after the configuration if possible
-  //await FlutterDownloader.initialize(debug: true);
+  await FlutterDownloader.initialize(debug: true);
 
   var pages = [
     NavigationItemModel(0, null),
@@ -31,6 +31,6 @@ void main() async {
         authenticationService: FirebaseAuthenticationRepository()..initialize(),
         userService: UserService("https://mrmeme.io/api/users"))),
     BlocProvider<NavigationCubit>(
-        create: (BuildContext context) => NavigationCubit(pages)..toPage(0)),
+        create: (BuildContext context) => NavigationCubit(pages)..toPage(1)),
   ], child: App()));
 }
