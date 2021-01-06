@@ -19,7 +19,7 @@ abstract class DownloadEvent extends Equatable {
 }
 
 class DownloadInitializeEvent extends DownloadEvent {
-  DownloadInitializeEvent() : super(DownloadEventIds.DownloadError);
+  DownloadInitializeEvent() : super(DownloadEventIds.Loaded);
 } 
 
 class DownloadErrorEvent extends DownloadEvent {

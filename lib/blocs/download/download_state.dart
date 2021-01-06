@@ -1,18 +1,20 @@
 part of 'download_bloc.dart';
 
 abstract class DownloadState extends Equatable {
-  const DownloadState();
+  final String url;
+  final bool isValid;
+
+  const DownloadState({this.url = '', this.isValid = false});
   
   @override
   List<Object> get props => [];
 }
 
 class DownloadIdealState extends DownloadState {
-  final String url;
-  final bool isValid;
-  final IEnumerable<Meme> recentDownloads;
+  final IEnumerable<ContentBase> recentDownloads;
 
-  const DownloadIdealState({this.url = '', this.isValid = false, this.recentDownloads});
+  const DownloadIdealState({String url = '', bool isValid = false, this.recentDownloads})
+    : super(url: url, isValid: isValid);
 
   DownloadIdealState copyWith({ String url = '', bool isValid = false, IEnumerable<Meme> recentDownloads})
     => DownloadIdealState(url: url ?? this.url, isValid: isValid ?? this.isValid, 
@@ -23,13 +25,13 @@ class DownloadIdealState extends DownloadState {
 }
 
 class DownloadCompletedState extends DownloadIdealState {
-  final Meme meme;
+  final ContentBase meme;
 
-  DownloadCompletedState(this.meme, { String url = '', bool isValid = false, IEnumerable<Meme> recentDownloads})
+  const DownloadCompletedState(this.meme, { String url = '', bool isValid = false, IEnumerable<Meme> recentDownloads})
     : super(url: url, isValid: isValid, recentDownloads: recentDownloads);
 
   @override
-  List<Object> get props => [meme];
+  List<Object> get props => [url, isValid, recentDownloads, meme];
 }
 
 class DownloadLoadingState extends DownloadState {
