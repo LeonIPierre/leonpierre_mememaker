@@ -4,8 +4,6 @@ import 'package:leonpierre_mememaker/repositories/entities/meme.dart';
 
 @immutable
 abstract class Meme extends ContentBase {
-  final String name;
-  final String description;
   final DateTime dateCreated;
   final DateTime datePosted;
 
@@ -16,7 +14,7 @@ abstract class Meme extends ContentBase {
   final List<String> tags;
 
   Meme(id, Uri locationPath, this.dateCreated,
-      { this.name, this.description,  this.datePosted, bool isLiked, author, this.likes, this.tags }) :
+      { String name, String description,  this.datePosted, bool isLiked, author, this.likes, this.tags }) :
       super(id, path: locationPath, name: name, description: description, isLiked: isLiked, author: author);
 
   Object clone({Meme copyFrom});
