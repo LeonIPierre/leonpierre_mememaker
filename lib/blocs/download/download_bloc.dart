@@ -28,7 +28,7 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
   Meme _memeToDownload;
 
   DownloadBloc(this._downloadService, this._favoritesBloc) : super(DownloadIdealState());
-  
+
   @override
   Stream<DownloadState> mapEventToState(DownloadEvent event) async* {
     switch (event.id) {
@@ -61,7 +61,6 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
             savedDir: event.downloadDirectory
           ))
           .then((_) => DownloadLoadingState())
-          //.then((_) => DownloadIdealState(url: downloadEvent.url))
           .catchError((error) => DownloadErrorState());
         break;
       case DownloadEventIds.DownloadUrlChanged:
