@@ -112,7 +112,7 @@ class _AppContainerState extends State<AppContainer> {
 
   Widget _buildDownloadPage(Map<String, dynamic> configuration) {
     return BlocProvider(create: (BuildContext context) => DownloadBloc(
-      MemeDownloadRepository(configuration["mrmeme:baseApiUrl"]), _favoritesBloc),
+      MemeDownloadRepository(configuration["mrmeme:baseApiUrl"]), _favoritesBloc)..initialize(),
     child: DownloadPage());
   }
 
